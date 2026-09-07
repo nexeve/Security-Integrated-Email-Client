@@ -1,520 +1,631 @@
-# \U0001f6e1\ufe0f Email Threat Detection & Forensics Platform
+# Cyber Leek
 
-> **AI-powered email threat detection, geolocation and forensic intelligence platform**
+### Secure-by-Design Email Client
 
-An intelligent email security platform designed to **detect, investigate, analyze, and explain suspicious or malicious emails**.
+> **AI-powered email threat detection, geolocation & forensic intelligence — integrated directly into the email experience.**
 
-The system combines email header forensics, authentication analysis, relay-path reconstruction, URL intelligence, reputation analysis, social-engineering detection, geolocation, deterministic risk scoring, and AI-assisted investigation into a unified workflow.
-
-> \U0001f680 Developed as an **MVP for Smart India Hackathon (SIH)**.
+[![Next.js](https://img.shields.io/badge/Next.js-Framework-black?logo=next.js)](https://nextjs.org/)
+[![TypeScript](https://img.shields.io/badge/TypeScript-Language-blue?logo=typescript)](https://www.typescriptlang.org/)
+[![Tailwind CSS](https://img.shields.io/badge/Tailwind%20CSS-Styling-06B6D4?logo=tailwindcss)](https://tailwindcss.com/)
+[![Framer Motion](https://img.shields.io/badge/Framer%20Motion-Animation-0055FF?logo=framer)](https://motion.dev/)
+[![TanStack Query](https://img.shields.io/badge/TanStack%20Query-Data%20Fetching-FF4154)](https://tanstack.com/query)
+[![SIH 2026](https://img.shields.io/badge/SIH-2026-orange)](https://sih.gov.in/)
 
 ---
 
-## \U0001f4cc Overview
+## Overview
 
-Email is one of the most common attack vectors used for:
+**Cyber Leek** is a secure-by-design webmail client developed for **Smart India Hackathon 2026 — Problem Statement SIH26106**.
 
-* Phishing
-* Credential theft
-* Business Email Compromise (BEC)
-* Sender impersonation
-* Malware delivery
-* Financial fraud
-* Social engineering
+Existing email-security solutions are often fragmented. Users may have to leave their email client, upload messages or headers to external services, investigate authentication results separately, and manually research suspicious origins.
 
-Investigating a suspicious email manually can require inspecting raw headers, authentication results, IP addresses, relay servers, URLs, domains, attachments, and message content.
+Cyber Leek takes a different approach:
 
-This project aims to turn that process into a **structured, automated, and explainable investigation pipeline**.
+> **Security analysis is built directly into the email client.**
 
-### Core Workflow
+Users can read their emails normally while the system automatically analyzes messages, categorizes them, assigns a **0–100 Safety Score**, identifies threats, validates email authentication, and provides origin and forensic information.
+
+The objective is to make email security **automatic, understandable, and available by default**.
+
+---
+
+## The Problem
+
+Traditional email security workflows can require users to perform multiple separate investigations:
+
+```mermaid
+flowchart LR
+    A[Receive Suspicious Email] --> B[Inspect Email]
+    B --> C[Extract Headers]
+    C --> D[External Analysis Tool]
+    D --> E[Check SPF / DKIM / DMARC]
+    E --> F[Investigate IP / Origin]
+    F --> G[Interpret Results]
+```
+
+This fragmented workflow creates unnecessary friction and assumes that the user understands email security and digital forensics.
+
+Cyber Leek aims to consolidate this workflow into the email client itself.
+
+---
+
+## Our Approach
+
+Instead of:
 
 ```text
-                  \u250c\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2510
-                  \u2502    .EML Input    \u2502
-                  \u2514\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u252c\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2518
-                           \u2502
-                           \u25bc
-                \u250c\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2510
-                \u2502 Email Parsing &     \u2502
-                \u2502 Header Extraction   \u2502
-                \u2514\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u252c\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2518
-                           \u2502
-             \u250c\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u253c\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2510
-             \u25bc             \u25bc             \u25bc
-      \u250c\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2510 \u250c\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2510 \u250c\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2510
-      \u2502 Header &   \u2502 \u2502 URL /      \u2502 \u2502 Sender &   \u2502
-      \u2502 Auth       \u2502 \u2502 Domain     \u2502 \u2502 IP Intel   \u2502
-      \u2502 Analysis   \u2502 \u2502 Analysis   \u2502 \u2502 & Geo      \u2502
-      \u2514\u2500\u2500\u2500\u2500\u2500\u252c\u2500\u2500\u2500\u2500\u2500\u2500\u2518 \u2514\u2500\u2500\u2500\u2500\u2500\u252c\u2500\u2500\u2500\u2500\u2500\u2500\u2518 \u2514\u2500\u2500\u2500\u2500\u2500\u252c\u2500\u2500\u2500\u2500\u2500\u2500\u2518
-            \u2502              \u2502              \u2502
-            \u2514\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u253c\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2518
-                           \u25bc
-                 \u250c\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2510
-                 \u2502 Threat Indicators \u2502
-                 \u2502 & Risk Scoring    \u2502
-                 \u2514\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u252c\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2518
-                          \u2502
-                          \u25bc
-                 \u250c\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2510
-                 \u2502 AI-Assisted      \u2502
-                 \u2502 Investigation     \u2502
-                 \u2514\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u252c\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2518
-                          \u2502
-                          \u25bc
-                 \u250c\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2510
-                 \u2502 Investigation    \u2502
-                 \u2502 Dashboard        \u2502
-                 \u2514\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2518
+Email Client
+     +
+Separate Security Tools
+     +
+Separate Forensic Tools
+```
+
+Cyber Leek provides:
+
+```text
+                    ┌─────────────────────────┐
+                    │      Cyber Leek         │
+                    │                         │
+                    │      Webmail Client     │
+                    │            +            │
+                    │    Security Analysis    │
+                    │            +            │
+                    │  Forensic Intelligence  │
+                    └─────────────────────────┘
+```
+
+The user does not need to manually upload an email or copy its headers into another website.
+
+The security layer is part of the mailbox itself.
+
+---
+
+# Core Workflow
+
+```mermaid
+flowchart TD
+    A[Incoming Email] --> B[Automatic Analysis]
+
+    B --> C[Content Analysis]
+    B --> D[Authentication Analysis]
+    B --> E[Origin Analysis]
+    B --> F[Metadata Analysis]
+
+    C --> G[Threat Assessment]
+    D --> G
+    E --> G
+    F --> G
+
+    G --> H[Safety Score 0–100]
+    G --> I[Email Classification]
+
+    H --> J[Inbox]
+    I --> J
+
+    J --> K[User Opens Email]
+    K --> L[Security & Forensic View]
 ```
 
 ---
 
-## \U0001f3af Objectives
+# Key Features
 
-The platform is designed to:
+## Secure Webmail Experience
 
-1. **Detect** potentially malicious emails.
-2. **Analyze** technical email metadata and headers.
-3. **Identify** suspicious URLs, domains, and IP addresses.
-4. **Reconstruct** the email's relay path.
-5. **Determine** geographical information associated with infrastructure.
-6. **Identify** social-engineering indicators.
-7. **Calculate** an explainable threat/risk score.
-8. **Assist investigators** in understanding why an email is suspicious.
-9. **Present findings** through a centralized investigation dashboard.
+Cyber Leek is fundamentally an **email client**, not an email-upload analyzer.
+
+Users can:
+
+- Browse their inbox
+- Open and read emails
+- Reply to messages
+- Forward messages
+- Navigate between mailbox sections
+- View security information directly within the email experience
+
+Security analysis is integrated into the normal workflow.
 
 ---
 
-## \U0001f50d Key Features
+## Automatic Email Classification
 
-### \U0001f4e7 Email Forensics
+Emails are automatically categorized according to their nature and security characteristics.
 
-Analyze `.eml` files and extract relevant forensic information, including:
+Current categories include:
 
-* Sender information
-* Recipient information
-* Subject
-* Message headers
-* `Received` headers
-* IP addresses
-* Domains
-* URLs
-* Authentication results
+| Category | Description |
+|---|---|
+| **Normal** | Regular legitimate communication |
+| **Promotional** | Marketing, offers, newsletters and sponsored content |
+| **Spam** | Unsolicited or unwanted messages |
+| **Suspicious** | Messages containing unusual or potentially risky characteristics |
+| **Malicious** | Messages exhibiting strong indicators of malicious intent |
 
-### \U0001f510 Authentication Analysis
+### Category ≠ Safety Score
 
-Inspect available email authentication information such as:
+These two concepts are deliberately separated.
 
-* SPF
-* DKIM
-* DMARC
-* Authentication results
-* Sender-domain inconsistencies
-
-Authentication failures can be used as supporting indicators during threat analysis.
-
-### \U0001f310 Relay-Path Reconstruction
-
-Reconstruct the route an email took through intermediary mail servers using its `Received` headers.
-
-This helps investigators identify:
-
-* Originating infrastructure
-* Intermediate mail servers
-* Suspicious relay patterns
-* IP addresses associated with the message
-
-### \U0001f30d IP Geolocation
-
-Extract relevant IP addresses and associate them with geographical and network information.
-
-Potential investigation data includes:
-
-* Country
-* Region
-* City
-* ISP / organization
-* Autonomous System information
-* Approximate geographical location
-
-> Geolocation is treated as an investigative indicator rather than definitive proof of an attacker's physical location.
-
-### \U0001f517 URL & Domain Intelligence
-
-Extract URLs and domains from email content and analyze them for suspicious characteristics.
-
-Potential indicators include:
-
-* Suspicious domains
-* URL redirection
-* Domain reputation
-* Newly observed infrastructure
-* Look-alike domains
-* Suspicious URL structures
-
-### \U0001f9e0 Social-Engineering Detection
-
-Analyze email content for patterns commonly associated with social engineering, including:
-
-* Urgency
-* Fear or intimidation
-* Credential requests
-* Financial requests
-* Impersonation
-* Suspicious calls to action
-* Unusual language patterns
-
-### \U0001f4ca Threat & Risk Scoring
-
-Combine multiple indicators into a structured risk assessment.
-
-Example indicators:
+For example:
 
 ```text
-Email Authentication
-        +
-Sender Reputation
-        +
-IP Reputation
-        +
-Geolocation
-        +
-URL Intelligence
-        +
-Social Engineering
-        +
-Header Anomalies
-        \u2193
-   Risk Assessment
+Category:
+PROMOTIONAL
+
+Safety Score:
+94 / 100
 ```
 
-The goal is not simply to label an email as *malicious* or *safe*, but to provide investigators with an **explainable basis for the assessment**.
+The email can be promotional while still being highly trustworthy.
 
-### \U0001f916 AI-Assisted Investigation
+The category describes **what the email is**.
 
-AI can assist investigators by:
-
-* Summarizing technical findings
-* Explaining suspicious indicators
-* Connecting multiple observations
-* Providing an investigation-oriented interpretation
-* Producing human-readable threat explanations
-
-AI output should complement deterministic security analysis rather than replace verifiable forensic evidence.
+The Safety Score describes **how risky the email is**.
 
 ---
 
-## \U0001f5a5\ufe0f Dashboard
+# Safety Score
 
-The platform is intended to provide a centralized investigation interface containing information such as:
-
-| Section            | Purpose                        |
-| ------------------ | ------------------------------ |
-| Email Overview     | Basic message information      |
-| Threat Score       | Overall risk assessment        |
-| Authentication     | SPF/DKIM/DMARC findings        |
-| Header Analysis    | Important header anomalies     |
-| Relay Path         | Email infrastructure route     |
-| IP Intelligence    | IP reputation and geolocation  |
-| URL Intelligence   | Suspicious links and domains   |
-| Social Engineering | Behavioral/content indicators  |
-| AI Investigation   | Human-readable analysis        |
-| Evidence           | Supporting forensic indicators |
-
----
-
-## \U0001f9e9 Investigation Philosophy
-
-The system follows a **defense-in-depth** approach.
-
-No single indicator should automatically determine whether an email is malicious.
-
-Instead, multiple signals are correlated:
+Every analyzed email receives a **0–100 Safety Score**.
 
 ```text
-                 \u250c\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2510
-                 \u2502 Email Header \u2502
-                 \u2514\u2500\u2500\u2500\u2500\u2500\u2500\u252c\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2518
-                        \u2502
-       \u250c\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u253c\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2510
-       \u25bc                \u25bc                \u25bc
- Authentication    Infrastructure     Content
-       \u2502                \u2502                \u2502
-       \u25bc                \u25bc                \u25bc
- SPF/DKIM/DMARC    IP / Domain       Social Engineering
-       \u2502                \u2502                \u2502
-       \u2514\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u253c\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2518
-                        \u25bc
-                 \u250c\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2510
-                 \u2502 Correlation  \u2502
-                 \u2514\u2500\u2500\u2500\u2500\u2500\u2500\u252c\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2518
-                        \u25bc
-                 \u250c\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2510
-                 \u2502 Risk Score   \u2502
-                 \u2514\u2500\u2500\u2500\u2500\u2500\u2500\u252c\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2518
-                        \u25bc
-                 \u250c\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2510
-                 \u2502 Investigation\u2502
-                 \u2502   Result     \u2502
-                 \u2514\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2518
+100 ───────────────────── SAFE
+ 75 ───────────────────── LOW RISK
+ 50 ───────────────────── MODERATE RISK
+ 25 ───────────────────── HIGH RISK
+  0 ───────────────────── CRITICAL RISK
 ```
 
-This makes the resulting assessment more explainable and useful for forensic investigation.
-
----
-
-## \U0001f6e0\ufe0f Technology
-
-The repository is currently primarily a **Python** project.
-
-The implementation is expected to evolve as the MVP develops.
-
-### Current / Planned Components
-
-* **Python** \u2014 Core analysis and processing
-* **Email / MIME parsing** \u2014 `.eml` processing
-* **Threat intelligence** \u2014 Reputation and indicator enrichment
-* **IP geolocation** \u2014 Infrastructure intelligence
-* **AI / NLP** \u2014 Investigation assistance
-* **Web dashboard** \u2014 Visualization and investigation workflow
-
-> Specific libraries and external services should be added here as they become part of the implemented stack.
-
----
-
-## \U0001f4e5 Input
-
-The primary investigation input is an email file in `.eml` format:
+Example:
 
 ```text
-email.eml
+┌──────────────────────────────┐
+│                              │
+│          92 / 100            │
+│             SAFE             │
+│                              │
+└──────────────────────────────┘
 ```
 
-The system parses the message and extracts the relevant forensic artifacts before analysis.
+The score is supported by an explanation of the factors that contributed to the assessment rather than functioning as an unexplained number.
 
 ---
 
-## \U0001f4e4 Output
+# Threat Detection
 
-An investigation produces structured findings such as:
+Cyber Leek can surface indicators including:
+
+- Phishing
+- Sender impersonation
+- Suspicious links
+- Suspicious attachments
+- Urgency-based manipulation
+- Authentication failures
+- Header anomalies
+- Domain inconsistencies
+- Other suspicious sender or content patterns
+
+Threat indicators are surfaced directly in the email experience.
+
+---
+
+# Email Authentication
+
+The security analysis includes:
+
+### SPF
+
+Determines whether the sending server is authorized to send mail for the domain.
+
+### DKIM
+
+Checks the presence and validity of cryptographic email signatures.
+
+### DMARC
+
+Evaluates domain alignment and authentication policy.
+
+Example:
 
 ```text
-Email
- \u251c\u2500\u2500 Sender
- \u251c\u2500\u2500 Recipient
- \u251c\u2500\u2500 Subject
- \u251c\u2500\u2500 Authentication
- \u2502    \u251c\u2500\u2500 SPF
- \u2502    \u251c\u2500\u2500 DKIM
- \u2502    \u2514\u2500\u2500 DMARC
- \u2502
- \u251c\u2500\u2500 Header Analysis
- \u2502    \u2514\u2500\u2500 Anomalies
- \u2502
- \u251c\u2500\u2500 Relay Path
- \u2502    \u251c\u2500\u2500 IP addresses
- \u2502    \u2514\u2500\u2500 Mail servers
- \u2502
- \u251c\u2500\u2500 IP Intelligence
- \u2502    \u251c\u2500\u2500 Reputation
- \u2502    \u2514\u2500\u2500 Geolocation
- \u2502
- \u251c\u2500\u2500 URL Intelligence
- \u2502    \u251c\u2500\u2500 Domains
- \u2502    \u2514\u2500\u2500 Suspicious URLs
- \u2502
- \u251c\u2500\u2500 Social Engineering
- \u2502    \u2514\u2500\u2500 Detected Indicators
- \u2502
- \u2514\u2500\u2500 Final Risk Assessment
-      \u251c\u2500\u2500 Risk Score
-      \u251c\u2500\u2500 Severity
-      \u2514\u2500\u2500 Explanation
+SPF       ✓ PASS
+DKIM      ✓ PASS
+DMARC     ✕ FAIL
 ```
 
----
-
-## \U0001f6a7 Project Status
-
-**Status: MVP / Active Development**
-
-The project is being developed as a Smart India Hackathon solution and is expected to evolve through multiple development stages.
-
-### Planned Development
-
-* [ ] Complete `.eml` parsing pipeline
-* [ ] Header forensic analysis
-* [ ] SPF/DKIM/DMARC analysis
-* [ ] Relay-path visualization
-* [ ] IP geolocation
-* [ ] URL/domain intelligence
-* [ ] Threat-intelligence integration
-* [ ] Social-engineering detection
-* [ ] Deterministic risk-scoring engine
-* [ ] AI-assisted investigation
-* [ ] Investigation dashboard
-* [ ] Evidence/report generation
-* [ ] End-to-end testing
-* [ ] Deployment
+These results contribute to the broader security assessment rather than being treated as the sole indicator of whether an email is safe.
 
 ---
 
-## \U0001f512 Security & Privacy
+# Origin & Geolocation Intelligence
 
-Email files may contain sensitive information.
+Cyber Leek can analyze relevant email metadata and header information to surface origin information.
 
-When using this platform:
+The interface can present:
 
-* Do not upload confidential emails to untrusted infrastructure.
-* Do not expose API keys or credentials in source code.
-* Use environment variables for secrets.
-* Sanitize sensitive information before sharing investigation results.
-* Treat third-party threat-intelligence services as external data processors.
-* Do not consider automated analysis alone as definitive attribution.
+- Origin IP
+- Country
+- Region
+- City
+- ISP / organization
+- Approximate geographical location
 
----
-
-## \u26a0\ufe0f Limitations
-
-The platform is an investigative aid, not an absolute source of attribution.
-
-In particular:
-
-* IP geolocation is approximate.
-* Email headers can be manipulated or incomplete.
-* Authentication results depend on the mail infrastructure.
-* Reputation databases may contain false positives or false negatives.
-* AI-generated explanations may require analyst verification.
-* A high risk score does not independently prove malicious intent.
-
-Human investigation and corroborating evidence remain important for high-impact decisions.
-
----
-
-## \U0001f3d7\ufe0f Project Architecture
-
-At a high level:
+Example:
 
 ```text
-                    \u250c\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2510
-                    \u2502   .EML Upload   \u2502
-                    \u2514\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u252c\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2518
-                             \u2502
-                             \u25bc
-                    \u250c\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2510
-                    \u2502 Email Parser    \u2502
-                    \u2514\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u252c\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2518
-                             \u2502
-                             \u25bc
-                    \u250c\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2510
-                    \u2502 Feature / IOC    \u2502
-                    \u2502 Extraction       \u2502
-                    \u2514\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u252c\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2518
-                             \u2502
-             \u250c\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u253c\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2510
-             \u25bc               \u25bc               \u25bc
-        Header/Auth      URL/Domain       IP/Geo
-         Analysis        Intelligence    Intelligence
-             \u2502               \u2502               \u2502
-             \u2514\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u253c\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2518
-                             \u25bc
-                    \u250c\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2510
-                    \u2502 Risk Engine     \u2502
-                    \u2514\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u252c\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2518
-                             \u2502
-                             \u25bc
-                    \u250c\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2510
-                    \u2502 AI Investigation\u2502
-                    \u2514\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u252c\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2518
-                             \u2502
-                             \u25bc
-                    \u250c\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2510
-                    \u2502 Dashboard /     \u2502
-                    \u2502 Report          \u2502
-                    \u2514\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2518
+Origin IP
+185.xxx.xxx.xxx
+
+Location
+Moscow, Russia
+
+Network
+Example ISP
+```
+
+> Geolocation is an investigative signal. It should not be interpreted as definitive proof of an attacker's physical location.
+
+---
+
+# Forensic Analysis
+
+Users can move beyond the simple question:
+
+> **"Is this email safe?"**
+
+and investigate:
+
+> **"Why was this email considered risky?"**
+
+The forensic view can expose:
+
+- Safety Score breakdown
+- Threat indicators
+- SPF / DKIM / DMARC results
+- Technical metadata
+- Email headers
+- Origin information
+- Analysis explanations
+- Risk factors
+
+---
+
+# User Experience
+
+The intended interaction model is:
+
+```mermaid
+flowchart LR
+    A[Inbox] --> B[Open Email]
+    B --> C[Read Email]
+    C --> D[View Safety Score]
+    D --> E[Security Analytics]
+    E --> F[Forensic Details]
+```
+
+### Inbox
+
+The inbox provides an immediate overview of:
+
+- Sender
+- Subject
+- Preview
+- Category
+- Safety Score
+- Security status
+
+### Email View
+
+Opening an email provides the complete message together with its security context.
+
+### Security Analytics
+
+Selecting the Safety Score opens a deeper analysis interface containing the technical and forensic details behind the assessment.
+
+---
+
+# Prototype Architecture
+
+The current prototype is intentionally designed to demonstrate the complete product experience without requiring production-scale infrastructure.
+
+```mermaid
+flowchart TD
+    A[Next.js Frontend] --> B[Next.js API Routes]
+    B --> C[Analysis Engine]
+
+    C --> D[Heuristic Rules]
+    C --> E[Mock Email Data]
+    C --> F[Simulated Security Checks]
+    C --> G[Mock Geolocation]
+
+    C --> H[Structured Analysis Result]
+    H --> B
+    B --> A
+```
+
+## Architecture Layers
+
+### Frontend
+
+Responsible for:
+
+- UI rendering
+- Navigation
+- User interaction
+- Email presentation
+- Security visualizations
+- Animations
+
+### API Layer
+
+Responsible for:
+
+- HTTP endpoints
+- Request validation
+- Retrieving email data
+- Calling the analysis engine
+- Returning structured results
+
+### Analysis Engine
+
+Responsible for:
+
+- Threat analysis
+- Categorization
+- Safety Score calculation
+- Security checks
+- Forensic information
+- Geolocation information
+
+The analysis engine is deliberately separated from the UI so that the implementation can evolve independently.
+
+---
+
+# Technology Stack
+
+| Layer | Technology |
+|---|---|
+| Framework | Next.js |
+| Language | TypeScript |
+| UI | React |
+| Styling | Tailwind CSS |
+| Components | shadcn/ui |
+| Animation | Framer Motion |
+| Data Fetching | TanStack Query |
+| Validation | Zod |
+| API | Next.js API Routes |
+| Version Control | Git / GitHub |
+
+---
+
+# Project Structure
+
+```text
+Integrated-EmailClient/
+│
+├── app/
+│   ├── api/
+│   │   └── emails/
+│   │       ├── route.ts
+│   │       └── [id]/
+│   │           └── route.ts
+│   │
+│   ├── email/
+│   │   └── [id]/
+│   │       └── page.tsx
+│   │
+│   ├── layout.tsx
+│   └── page.tsx
+│
+├── components/
+│   ├── inbox/
+│   ├── email-view/
+│   └── ui/
+│
+├── lib/
+│   ├── api/
+│   ├── analysis/
+│   │   ├── rules/
+│   │   └── mock/
+│   └── types.ts
+│
+├── public/
+│
+├── package.json
+├── tsconfig.json
+└── README.md
 ```
 
 ---
 
-## \U0001f680 Getting Started
+# Prototype Scope
 
-Clone the repository:
+The current prototype uses controlled sample data and simplified analysis to demonstrate the intended experience.
+
+### Implemented / Demonstrated
+
+- Webmail inbox
+- Email navigation
+- Email categorization
+- Safety Score
+- Threat indicators
+- Security analysis
+- SPF / DKIM / DMARC simulation
+- Origin information
+- Geolocation representation
+- Forensic analysis
+- Responsive UI
+- Animated interactions
+
+### Currently Simulated
+
+- Real email accounts
+- IMAP / SMTP integration
+- Machine-learning inference
+- Real-time threat intelligence
+- Production IP geolocation services
+- Database persistence
+- Real-time email delivery
+- User authentication
+
+The prototype focuses on demonstrating the **product experience and system architecture** before implementing production-scale infrastructure.
+
+---
+
+# Future Architecture
+
+The intended system can evolve from the current prototype toward a dedicated Python/Django backend and real security infrastructure.
+
+```mermaid
+flowchart TD
+    A[Next.js Frontend] --> B[Django REST API]
+
+    B --> C[Threat Analysis Service]
+    C --> D[Python ML / NLP Models]
+
+    B --> E[PostgreSQL]
+
+    C --> F[Threat Intelligence]
+    C --> G[Geolocation Services]
+    C --> H[Email Authentication]
+
+    I[Email Infrastructure] --> B
+```
+
+The frontend should remain largely independent from the underlying analysis implementation.
+
+The current TypeScript analysis engine is a **prototype implementation**. A future Python implementation can preserve the same conceptual data contract while replacing the underlying analysis logic with ML/NLP models and external intelligence services.
+
+---
+
+# Sample Threat Scenarios
+
+The prototype uses realistic scenarios to demonstrate different security states.
+
+| Scenario | Example Classification | Example Score |
+|---|---|---:|
+| Normal business email | Normal | 95 |
+| Legitimate newsletter | Promotional | 85 |
+| Marketing campaign | Promotional | 75 |
+| Unsolicited message | Spam | 40 |
+| Phishing attempt | Malicious | 5 |
+| CEO impersonation | Suspicious | 15 |
+| Suspicious attachment | Suspicious | 50 |
+| Compromised account | Malicious | 10 |
+| Fake invoice | Malicious | 25 |
+| Legitimate account verification | Normal | 85 |
+
+> Scores shown above are representative prototype values and do not represent a production threat-detection model.
+
+---
+
+# Running Locally
+
+## Prerequisites
+
+Make sure you have:
+
+- [Node.js](https://nodejs.org/)
+- npm
+- Git
+
+## Clone the Repository
 
 ```bash
-git clone https://github.com/K1LL-Sw1tch07/Email-threat-detection.git
-cd Email-threat-detection
+git clone https://github.com/nexeve/Security-Integrated-Email-Client.git
+cd Security-Integrated-Email-Client
 ```
 
-Create a virtual environment:
+## Install Dependencies
 
 ```bash
-python -m venv .venv
+npm install
 ```
 
-Activate it on Linux/macOS:
+## Start the Development Server
 
 ```bash
-source .venv/bin/activate
+npm run dev
 ```
 
-Activate it on Windows:
-
-```powershell
-.venv\Scripts\activate
-```
-
-Install project dependencies once `requirements.txt` is configured:
-
-```bash
-pip install -r requirements.txt
-```
-
-Then follow the project-specific setup instructions for the configured services and dashboard.
-
----
-
-## \U0001f91d Contributing
-
-Contributions are welcome as the project develops.
-
-Recommended workflow:
+The application will be available at:
 
 ```text
-Create Branch
-     \u2193
-Implement Feature
-     \u2193
-Test
-     \u2193
-Commit
-     \u2193
-Pull Request
-     \u2193
-Review
-     \u2193
-Merge
+http://localhost:3000
 ```
 
-For significant architectural changes, discuss the approach with the team before implementation.
+---
+
+# Development Workflow
+
+The project is being developed incrementally around a working vertical slice:
+
+```mermaid
+flowchart LR
+    A[Project Setup] --> B[Inbox]
+    B --> C[Email Reader]
+    C --> D[Security Analysis]
+    D --> E[Forensics]
+    E --> F[UI Polish]
+    F --> G[Production Architecture]
+```
+
+The immediate objective is to create a convincing prototype demonstrating the complete security-aware email workflow.
 
 ---
 
-## \U0001f4da Project Context
+# Why Cyber Leek?
 
-This project was developed as part of **Smart India Hackathon (SIH)** and focuses on the problem of AI-powered email threat detection, geolocation, and forensic intelligence.
+Cyber Leek is built around a simple principle:
 
-The repository serves as the central codebase for the team's implementation and experimentation.
+> **Email security should not require the user to become a security analyst.**
+
+Instead of asking users to manually investigate suspicious messages, security analysis should happen as part of the email experience.
+
+The long-term vision is a mailbox where:
+
+- Threats are identified automatically.
+- Suspicious messages are clearly surfaced.
+- Security decisions are explainable.
+- Origin information is accessible.
+- Forensic investigation is available when required.
+- Security is built into the experience rather than added as an external tool.
 
 ---
 
-## \U0001f4c4 License
+# Smart India Hackathon 2026
 
-License information will be added when the project license is finalized.
+| | |
+|---|---|
+| **Event** | Smart India Hackathon 2026 |
+| **Problem Statement** | SIH26106 |
+| **Category** | Software |
+| **Project** | Cyber Leek |
+| **Focus** | AI-Powered Email Threat Detection, Geolocation & Forensic Intelligence |
 
 ---
 
-## \U0001f465 Team
+# Project Status
 
-**SIH Team \u2014 Email Threat Detection & Forensics**
+> **Prototype / MVP — Actively Under Development**
 
-Built for **Smart India Hackathon**.
+The current version focuses on validating the integrated webmail and security-analysis experience.
+
+Future development will focus on:
+
+- Real email ingestion
+- Production authentication
+- ML/NLP threat classification
+- Real SPF/DKIM/DMARC validation
+- Real IP geolocation
+- Threat intelligence integration
+- Persistent storage
+- Scalable backend infrastructure
+
+---
+
+## License
+
+This project is currently developed as a prototype for **Smart India Hackathon 2026**.
+
+License information will be added as the project moves toward public release.
