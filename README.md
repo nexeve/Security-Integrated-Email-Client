@@ -19,7 +19,7 @@
 
 Existing email-security solutions are often fragmented. Users may have to leave their email client, upload messages or headers to external services, investigate authentication results separately, and manually research suspicious origins.
 
-Cyber Leek takes a different approach:
+Cyber Leek, my team's solution, takes a different approach:
 
 > **Security analysis is built directly into the email client.**
 
