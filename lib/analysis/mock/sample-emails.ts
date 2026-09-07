@@ -57,6 +57,7 @@ We have detected unusual activity on your account. Your account will be SUSPENDE
 To verify your identity and restore your account access, please click here immediately:
 
 http://bit.ly/verify-account-now
+https://evil-domain.com/login
 
 You must enter your password and username to confirm your identity. This is required to protect your account security.
 
@@ -90,6 +91,8 @@ Please transfer $50,000 to the following account:
 - Bank: International Bank
 - Account: 1234567890
 - Routing: 987654321
+
+Payment details: https://executive-corp.com/wire-transfer
 
 This is for a vendor payment that must be completed today. Do not discuss this with anyone else.
 
@@ -126,10 +129,12 @@ Don't miss our biggest sale of the year! Get premium software at incredible disc
 ✅ 50% Off Cloud Storage
 
 Click here to shop now: https://tech-promos.com/sale
+https://tech-promos.com/deals/office
+https://tech-promos.com/deals/security
 
 This offer expires in 24 hours. Use code: FLASH70
 
-To unsubscribe, click here.
+To unsubscribe, click here: https://tech-promos.com/unsubscribe
 
 Best,
 The Tech Deals Team`,
@@ -304,6 +309,7 @@ IP: 203.0.113.1
 If this was not you, please verify your account immediately:
 
 https://amazonn-secure.com/verify-account
+https://amazonn-secure.com/login/reset
 
 Enter your Amazon password and confirm your identity to secure your account.
 

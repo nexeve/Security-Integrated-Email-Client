@@ -1,5 +1,5 @@
 import { useQuery } from '@tanstack/react-query';
-import { EmailWithAnalysis, RawEmail, AnalysisResult } from '@/lib/types';
+import { EmailWithAnalysis, RawEmail, AnalysisResult, ExtendedAnalysisResult } from '@/lib/types';
 
 interface EmailListItem {
   id: string;
@@ -13,7 +13,7 @@ interface EmailListItem {
 
 interface EmailDetailResponse {
   email: RawEmail;
-  analysis: AnalysisResult;
+  analysis: ExtendedAnalysisResult;
 }
 
 /**

@@ -1,9 +1,13 @@
-import { RawEmail, AnalysisResult, EmailCategory, SecurityCheckStatus, ThreatIndicator, SecurityCheckResult, GeolocationInfo, ForensicInfo, ScoreFactor } from '../types';
+import { RawEmail, AnalysisResult, EmailCategory, SecurityCheckStatus, ThreatIndicator, SecurityCheckResult, GeolocationInfo, ForensicInfo, ScoreFactor, ExtendedAnalysisResult } from '../types';
 import { AnalysisEngine, AnalysisConfig } from './types';
 import { checkSPF, checkDKIM, checkDMARC } from './rules/security-checks';
 import { detectPhishing, detectSpoofing, detectSuspiciousAttachments } from './rules/threat-detection';
 import { getGeolocation } from './mock/geolocation';
 import { calculateSafetyScore, determineCategory } from './rules/scoring';
+import { generateThreatOverview } from './mock/threat-overview';
+import { generateOriginAnalysis } from './mock/origin-analysis';
+import { generateAIInvestigation } from './mock/ai-investigation';
+import { generateURLIntelligence } from './mock/url-intelligence';
 
 /**
  * Heuristic Analysis Engine
@@ -18,7 +22,7 @@ export class HeuristicAnalysisEngine implements AnalysisEngine {
     this.config = config;
   }
 
-  analyze(email: RawEmail): AnalysisResult {
+  analyze(email: RawEmail): ExtendedAnalysisResult {
     // Step 1: Perform security checks
     const spfResult = checkSPF(email);
     const dkimResult = checkDKIM(email);
@@ -59,6 +63,22 @@ export class HeuristicAnalysisEngine implements AnalysisEngine {
       safetyScore
     );
 
+    // Step 6: Generate extended analytics (mock for prototype)
+    const threatOverview = generateThreatOverview(email, safetyScore, threatIndicators);
+    const originAnalysis = generateOriginAnalysis(email);
+    const aiInvestigation = generateAIInvestigation(email, threatIndicators, safetyScore);
+    const urlIntelligence = generateURLIntelligence(email);
+    
+    // Step 7: Generate evidence package metadata
+    const evidencePackage = {
+      reportId: `RPT-${Date.now()}-${email.id}`,
+      generatedAt: new Date().toISOString(),
+      analysisVersion: '1.0.0-prototype',
+      canExport: true,
+      exportFormats: ['pdf', 'json'] as ('pdf' | 'json' | 'xml')[],
+      summary: `Security analysis report for email ${email.id}. Risk Level: ${threatOverview.riskLevel}, Safety Score: ${safetyScore}/100`,
+    };
+
     return {
       safetyScore,
       category,
@@ -70,6 +90,11 @@ export class HeuristicAnalysisEngine implements AnalysisEngine {
       },
       geolocation,
       forensicDetails,
+      threatOverview,
+      originAnalysis,
+      aiInvestigation,
+      urlIntelligence,
+      evidencePackage,
     };
   }
 

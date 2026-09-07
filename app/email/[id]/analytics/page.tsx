@@ -101,8 +101,7 @@ export default function EmailAnalyticsPage({ params }: { params: Promise<{ id: s
           ) : (
             <SecurityAnalytics
               analysis={analysis}
-              senderEmail={email.headers.from.email}
-              senderName={email.headers.from.name}
+              email={email}
             />
           )}
         </div>

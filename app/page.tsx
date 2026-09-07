@@ -3,6 +3,7 @@
 import { useEmails } from '@/lib/api/emails';
 import { MainLayout } from '@/components/layout/MainLayout';
 import { EmailRow } from '@/components/inbox/EmailRow';
+import type { ExtendedAnalysisResult } from '@/lib/types';
 
 export default function InboxPage() {
   const { data: emails, isLoading, error } = useEmails();
