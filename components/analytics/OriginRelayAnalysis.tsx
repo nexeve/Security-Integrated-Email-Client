@@ -3,6 +3,13 @@
 import { Card } from '@/components/ui/card';
 import { OriginAnalysis } from '@/lib/types';
 import { Globe, MapPin, Network, ArrowRight } from 'lucide-react';
+import dynamic from 'next/dynamic';
+
+// Dynamically import Leaflet to avoid SSR issues
+const MapComponent = dynamic(() => import('./MapComponent'), { 
+  ssr: false,
+  loading: () => <div className="h-96 bg-gray-100 rounded-lg flex items-center justify-center">Loading map...</div>
+});
 
 interface OriginRelayAnalysisProps {
   origin: OriginAnalysis;
@@ -16,8 +23,8 @@ export function OriginRelayAnalysis({ origin }: OriginRelayAnalysisProps) {
         <h2 className="text-lg font-semibold">Origin / Mail Relay Analysis</h2>
       </div>
 
-      {/* Key Origin Information */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+      {/* A. ORIGIN SUMMARY */}
+      <div className="mb-6 grid grid-cols-1 md:grid-cols-2 gap-4">
         <OriginDetail
           icon={MapPin}
           label="Earliest Reliable IP"
@@ -42,32 +49,18 @@ export function OriginRelayAnalysis({ origin }: OriginRelayAnalysisProps) {
         />
       </div>
 
-      {/* Earliest Origin */}
-      <div className="mb-6 p-4 bg-blue-50 rounded-lg border border-blue-200">
-        <div className="text-sm font-medium text-blue-900 mb-2">Earliest Origin</div>
-        <div className="grid grid-cols-2 gap-2 text-sm">
-          <div>
-            <span className="text-gray-600">IP:</span>{' '}
-            <span className="font-medium">{origin.earliestOrigin.ip}</span>
-          </div>
-          <div>
-            <span className="text-gray-600">Provider:</span>{' '}
-            <span className="font-medium">{origin.earliestOrigin.provider || 'Unknown'}</span>
-          </div>
-          <div>
-            <span className="text-gray-600">Country:</span>{' '}
-            <span className="font-medium">{origin.earliestOrigin.location.country}</span>
-          </div>
-          {origin.earliestOrigin.location.city && (
-            <div>
-              <span className="text-gray-600">City:</span>{' '}
-              <span className="font-medium">{origin.earliestOrigin.location.city}</span>
-            </div>
-          )}
+      {/* B. GEOGRAPHIC VISUALIZATION */}
+      <div className="mb-6">
+        <div className="text-sm font-medium text-gray-900 mb-3">Geographic Visualization</div>
+        <MapComponent 
+          origin={origin}
+        />
+        <div className="text-xs text-gray-500 mt-2">
+          * Lines represent observed relay sequence for visualization only
         </div>
       </div>
 
-      {/* Relay Path */}
+      {/* C. MAIL RELAY PATH */}
       <div>
         <div className="text-sm font-medium text-gray-900 mb-3">
           Mail Relay Path ({origin.totalHops} hops)
@@ -77,7 +70,7 @@ export function OriginRelayAnalysis({ origin }: OriginRelayAnalysisProps) {
             <div key={hop.hopNumber} className="flex items-start gap-3">
               <div className="flex flex-col items-center">
                 <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold ${
-                  hop.hopNumber === 1 ? 'bg-blue-500 text-white' : 'bg-gray-200 text-gray-700'
+                  hop.role === 'earliest_origin' ? 'bg-blue-500 text-white' : 'bg-gray-200 text-gray-700'
                 }`}>
                   {hop.hopNumber}
                 </div>
@@ -91,13 +84,20 @@ export function OriginRelayAnalysis({ origin }: OriginRelayAnalysisProps) {
                   <span className="text-sm font-medium text-gray-900">
                     {hop.hostname || hop.ip}
                   </span>
-                  <span className={`text-xs px-2 py-0.5 rounded ${
-                    hop.confidence === 'high' ? 'bg-green-100 text-green-700' :
-                    hop.confidence === 'medium' ? 'bg-yellow-100 text-yellow-700' :
-                    'bg-red-100 text-red-700'
-                  }`}>
-                    {hop.confidence}
-                  </span>
+                  <div className="flex items-center gap-2">
+                    {hop.role === 'earliest_origin' && (
+                      <span className="text-xs px-2 py-0.5 rounded bg-blue-100 text-blue-700">
+                        ORIGIN
+                      </span>
+                    )}
+                    <span className={`text-xs px-2 py-0.5 rounded ${
+                      hop.confidence === 'high' ? 'bg-green-100 text-green-700' :
+                      hop.confidence === 'medium' ? 'bg-yellow-100 text-yellow-700' :
+                      'bg-red-100 text-red-700'
+                    }`}>
+                      {hop.confidence}
+                    </span>
+                  </div>
                 </div>
                 
                 <div className="grid grid-cols-2 gap-2 text-xs text-gray-600">

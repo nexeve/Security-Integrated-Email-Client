@@ -65,6 +65,8 @@ export interface GeolocationInfo {
   ip: string;
   isp?: string;
   accuracy: 'high' | 'medium' | 'low';
+  latitude?: number;
+  longitude?: number;
 }
 
 export interface ScoreFactor {
@@ -132,9 +134,12 @@ export interface RelayHop {
     country: string;
     city?: string;
     region?: string;
+    latitude?: number;
+    longitude?: number;
   };
   timestamp?: string;
   confidence: 'high' | 'medium' | 'low';
+  role: 'earliest_origin' | 'relay';
 }
 
 export interface OriginAnalysis {
