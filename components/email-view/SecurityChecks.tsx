@@ -1,6 +1,7 @@
-import { Card } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
+'use client';
+
 import { SecurityCheckResult, SecurityCheckStatus } from '@/lib/types';
+import { CheckCircle2, XCircle, MinusCircle, HelpCircle, ShieldCheck } from 'lucide-react';
 
 interface SecurityChecksProps {
   spf: SecurityCheckResult;
@@ -8,55 +9,103 @@ interface SecurityChecksProps {
   dmarc: SecurityCheckResult;
 }
 
-const statusColors: Record<SecurityCheckStatus, string> = {
-  pass: 'bg-green-500/10 text-green-700 border-green-500/20',
-  fail: 'bg-red-500/10 text-red-700 border-red-500/20',
-  neutral: 'bg-gray-500/10 text-gray-700 border-gray-500/20',
-  unknown: 'bg-yellow-500/10 text-yellow-700 border-yellow-500/20',
-};
-
-const statusIcons: Record<SecurityCheckStatus, string> = {
-  pass: '✓',
-  fail: '✗',
-  neutral: '○',
-  unknown: '?',
+const statusConfig: Record<SecurityCheckStatus, {
+  color: string;
+  bg: string;
+  border: string;
+  Icon: React.ElementType;
+  label: string;
+}> = {
+  pass: {
+    color:  'var(--safe)',
+    bg:     'oklch(0.66 0.155 145 / 10%)',
+    border: 'oklch(0.66 0.155 145 / 20%)',
+    Icon:   CheckCircle2,
+    label:  'PASS',
+  },
+  fail: {
+    color:  'var(--danger)',
+    bg:     'oklch(0.62 0.22 25 / 10%)',
+    border: 'oklch(0.62 0.22 25 / 20%)',
+    Icon:   XCircle,
+    label:  'FAIL',
+  },
+  neutral: {
+    color:  'var(--muted-foreground)',
+    bg:     'oklch(1 0 0 / 4%)',
+    border: 'oklch(1 0 0 / 8%)',
+    Icon:   MinusCircle,
+    label:  'NEUTRAL',
+  },
+  unknown: {
+    color:  'var(--warning)',
+    bg:     'oklch(0.72 0.16 75 / 10%)',
+    border: 'oklch(0.72 0.16 75 / 20%)',
+    Icon:   HelpCircle,
+    label:  'UNKNOWN',
+  },
 };
 
 export function SecurityChecks({ spf, dkim, dmarc }: SecurityChecksProps) {
   const checks = [
-    { name: 'SPF', result: spf, description: 'Sender Policy Framework' },
-    { name: 'DKIM', result: dkim, description: 'DomainKeys Identified Mail' },
-    { name: 'DMARC', result: dmarc, description: 'Domain-based Message Authentication' },
+    { name: 'SPF',   result: spf,  description: 'Sender Policy Framework' },
+    { name: 'DKIM',  result: dkim, description: 'DomainKeys Identified Mail' },
+    { name: 'DMARC', result: dmarc,description: 'Domain-based Message Authentication' },
   ];
 
   return (
-    <Card className="p-6">
-      <h3 className="text-lg font-semibold mb-4">Security Checks</h3>
-      <div className="space-y-4">
-        {checks.map((check) => (
-          <div
-            key={check.name}
-            className="flex items-start justify-between p-3 border rounded-lg bg-gray-50"
-          >
-            <div className="flex-1">
-              <div className="flex items-center gap-2 mb-1">
-                <span className="font-semibold">{check.name}</span>
-                <span className="text-xs text-gray-500">{check.description}</span>
-              </div>
-              <p className="text-sm text-gray-600">{check.result.details}</p>
-              {check.result.domain && (
-                <p className="text-xs text-gray-500 mt-1">
-                  Domain: {check.result.domain}
-                </p>
-              )}
-            </div>
-            <Badge className={statusColors[check.result.status]} variant="outline">
-              <span className="mr-1">{statusIcons[check.result.status]}</span>
-              {check.result.status}
-            </Badge>
-          </div>
-        ))}
+    <div
+      className="rounded-xl p-5"
+      style={{
+        background:  'var(--surface-1)',
+        border:      '1px solid oklch(1 0 0 / 7%)',
+        boxShadow:   'inset 0 1px 0 oklch(1 0 0 / 4%)',
+      }}
+    >
+      <div className="flex items-center gap-2 mb-4">
+        <ShieldCheck className="h-4 w-4" style={{ color: 'var(--accent-cyan)' }} />
+        <h3 className="text-sm font-semibold text-foreground">Authentication</h3>
       </div>
-    </Card>
+
+      <div className="space-y-2.5">
+        {checks.map((check) => {
+          const cfg = statusConfig[check.result.status];
+          const { Icon } = cfg;
+          return (
+            <div
+              key={check.name}
+              className="flex items-start justify-between gap-3 p-3 rounded-lg"
+              style={{ background: 'oklch(0 0 0 / 15%)', border: '1px solid oklch(1 0 0 / 6%)' }}
+            >
+              <div className="flex-1 min-w-0">
+                <div className="flex items-center gap-2 mb-1">
+                  <span className="text-xs font-bold text-foreground tracking-wide">
+                    {check.name}
+                  </span>
+                  <span className="text-xs text-muted-foreground">{check.description}</span>
+                </div>
+                <p className="text-xs text-muted-foreground leading-relaxed">{check.result.details}</p>
+                {check.result.domain && (
+                  <p className="text-xs mt-1" style={{ color: 'var(--accent-cyan)', opacity: 0.7 }}>
+                    {check.result.domain}
+                  </p>
+                )}
+              </div>
+              <div
+                className="flex items-center gap-1.5 px-2 py-1 rounded-md text-xs font-semibold flex-shrink-0"
+                style={{
+                  color:      cfg.color,
+                  background: cfg.bg,
+                  border:     `1px solid ${cfg.border}`,
+                }}
+              >
+                <Icon className="h-3 w-3" />
+                {cfg.label}
+              </div>
+            </div>
+          );
+        })}
+      </div>
+    </div>
   );
 }

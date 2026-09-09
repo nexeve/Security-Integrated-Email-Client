@@ -1,75 +1,102 @@
 'use client';
 
-import { Card } from '@/components/ui/card';
 import { RawEmail } from '@/lib/types';
 import { Mail, User, Reply, FileText } from 'lucide-react';
 
 interface EmailDetailsProps {
-  email: RawEmail;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  email: any;
 }
 
-export function EmailDetails({ email }: EmailDetailsProps) {
+function DetailRow({
+  icon: Icon,
+  label,
+  value,
+}: {
+  icon: React.ElementType;
+  label: string;
+  value: string;
+}) {
   return (
-    <Card className="p-6">
-      <div className="flex items-center gap-2 mb-6">
-        <Mail className="h-5 w-5 text-gray-600" />
-        <h2 className="text-lg font-semibold">Email Details</h2>
+    <div
+      className="flex items-start gap-3 p-3 rounded-lg"
+      style={{ background: 'oklch(0 0 0 / 18%)', border: '1px solid oklch(1 0 0 / 6%)' }}
+    >
+      <div
+        className="w-7 h-7 rounded-md flex items-center justify-center flex-shrink-0 mt-0.5"
+        style={{ background: 'oklch(0.720 0.140 200 / 10%)' }}
+      >
+        <Icon className="h-3.5 w-3.5" style={{ color: 'var(--accent-cyan)' }} />
       </div>
-
-      <div className="space-y-4">
-        <DetailRow
-          icon={User}
-          label="Sender"
-          value={`${email.headers.from.name} <${email.headers.from.email}>`}
-        />
-        
-        <DetailRow
-          icon={User}
-          label="Recipient"
-          value={email.headers.to.map(t => `${t.name} <${t.email}>`).join(', ')}
-        />
-        
-        {email.headers.cc && email.headers.cc.length > 0 && (
-          <DetailRow
-            icon={User}
-            label="CC"
-            value={email.headers.cc.map(t => `${t.name} <${t.email}>`).join(', ')}
-          />
-        )}
-        
-        {email.headers.returnPath && (
-          <DetailRow
-            icon={Reply}
-            label="Reply-To"
-            value={email.headers.returnPath}
-          />
-        )}
-        
-        <DetailRow
-          icon={FileText}
-          label="Subject"
-          value={email.headers.subject}
-        />
+      <div className="flex-1 min-w-0">
+        <div className="text-xs text-muted-foreground mb-0.5">{label}</div>
+        <div className="text-sm text-foreground break-words leading-relaxed">{value}</div>
       </div>
-    </Card>
+    </div>
   );
 }
 
-function DetailRow({ 
-  icon: Icon, 
-  label, 
-  value 
-}: { 
-  icon: any; 
-  label: string; 
-  value: string; 
-}) {
+export function EmailDetails({ email }: EmailDetailsProps) {
+  // Handle both RawEmail and plain email shapes
+  const headers = email?.headers ?? email;
+  const from = headers?.from ?? email?.from;
+  const to   = headers?.to   ?? (email?.to ? [{ name: '', email: email.to }] : []);
+  const cc   = headers?.cc;
+  const returnPath = headers?.returnPath;
+  const subject    = headers?.subject ?? email?.subject;
+
   return (
-    <div className="flex items-start gap-3">
-      <Icon className="h-4 w-4 text-gray-500 mt-0.5 flex-shrink-0" />
-      <div className="flex-1 min-w-0">
-        <div className="text-sm text-gray-600 mb-1">{label}</div>
-        <div className="text-sm font-medium text-gray-900 break-words">{value}</div>
+    <div
+      className="rounded-xl p-6"
+      style={{
+        background: 'var(--surface-1)',
+        border:     '1px solid oklch(1 0 0 / 7%)',
+        boxShadow:  'inset 0 1px 0 oklch(1 0 0 / 4%)',
+      }}
+    >
+      <div className="flex items-center gap-2 mb-4">
+        <Mail className="h-4 w-4" style={{ color: 'var(--accent-cyan)' }} />
+        <h2 className="text-sm font-semibold text-foreground uppercase tracking-wider">
+          Email Details
+        </h2>
+      </div>
+
+      <div className="space-y-2">
+        {from && (
+          <DetailRow
+            icon={User}
+            label="Sender"
+            value={from.name ? `${from.name} <${from.email}>` : from.email ?? '—'}
+          />
+        )}
+
+        {to && to.length > 0 && (
+          <DetailRow
+            icon={User}
+            label="Recipient"
+            value={to.map((t: { name?: string; email: string }) =>
+              t.name ? `${t.name} <${t.email}>` : t.email
+            ).join(', ')}
+          />
+        )}
+
+        {cc && cc.length > 0 && (
+          <DetailRow
+            icon={User}
+            label="CC"
+            value={cc.map((t: { name?: string; email: string }) =>
+              t.name ? `${t.name} <${t.email}>` : t.email
+            ).join(', ')}
+          />
+        )}
+
+        {returnPath && (
+          <DetailRow icon={Reply} label="Reply-To" value={returnPath} />
+        )}
+
+        {subject && (
+          <DetailRow icon={FileText} label="Subject" value={subject} />
+        )}
       </div>
     </div>
   );

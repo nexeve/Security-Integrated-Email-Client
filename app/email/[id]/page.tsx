@@ -5,6 +5,8 @@ import { useEmail } from '@/lib/api/emails';
 import { useRouter } from 'next/navigation';
 import { MainLayout } from '@/components/layout/MainLayout';
 import { EmailView } from '@/components/email-view/EmailView';
+import { ChevronLeft, RefreshCw } from 'lucide-react';
+import { motion } from 'framer-motion';
 
 export default function EmailDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const router = useRouter();
@@ -21,41 +23,37 @@ export default function EmailDetailPage({ params }: { params: Promise<{ id: stri
   const { data: emailData, isLoading, error } = useEmail(id || '');
 
   const handleAnalyticsClick = () => {
-    if (id) {
-      router.push(`/email/${id}/analytics`);
-    }
+    if (id) router.push(`/email/${id}/analytics`);
   };
 
-  if (!resolved) {
-    return (
-      <MainLayout>
-        <div className="p-6">
-          <div className="text-center text-gray-500">Loading...</div>
-        </div>
-      </MainLayout>
-    );
-  }
+  const LoadingState = (
+    <MainLayout>
+      <div className="flex flex-col items-center justify-center h-64 gap-4">
+        <motion.div
+          animate={{ rotate: 360 }}
+          transition={{ duration: 1.5, repeat: Infinity, ease: 'linear' }}
+        >
+          <RefreshCw className="h-7 w-7" style={{ color: 'var(--accent-cyan)' }} />
+        </motion.div>
+        <p className="text-sm text-muted-foreground">Loading email…</p>
+      </div>
+    </MainLayout>
+  );
 
-  if (isLoading) {
-    return (
-      <MainLayout>
-        <div className="p-6">
-          <div className="text-center text-gray-500">Loading email...</div>
-        </div>
-      </MainLayout>
-    );
-  }
+  if (!resolved || isLoading) return LoadingState;
 
   if (error || !emailData) {
     return (
       <MainLayout>
-        <div className="p-6">
-          <div className="text-center text-red-600">Error loading email</div>
+        <div className="flex flex-col items-center justify-center h-64 gap-3">
+          <p className="text-sm font-medium" style={{ color: 'var(--danger)' }}>
+            Unable to load email
+          </p>
           <button
-            onClick={() => router.back()}
-            className="mt-4 px-4 py-2 bg-gray-200 rounded hover:bg-gray-300"
+            onClick={() => router.push('/')}
+            className="text-xs text-muted-foreground hover:text-foreground transition-colors underline-offset-2 hover:underline"
           >
-            Back to Inbox
+            Go back
           </button>
         </div>
       </MainLayout>
@@ -67,14 +65,23 @@ export default function EmailDetailPage({ params }: { params: Promise<{ id: stri
   return (
     <MainLayout>
       <div className="h-full flex flex-col">
-        <div className="flex items-center gap-4 px-6 py-3 border-b bg-gray-50">
+        {/* Breadcrumb bar */}
+        <div
+          className="flex items-center gap-3 px-5 py-2.5 flex-shrink-0"
+          style={{
+            background: 'oklch(0 0 0 / 15%)',
+            borderBottom: '1px solid oklch(1 0 0 / 6%)',
+          }}
+        >
           <button
-            onClick={() => router.back()}
-            className="text-sm text-gray-600 hover:text-gray-900 flex items-center gap-1"
+            onClick={() => router.push('/')}
+            className="flex items-center gap-1.5 text-sm transition-colors text-muted-foreground hover:text-foreground"
           >
-            ← Back to Inbox
+            <ChevronLeft className="h-4 w-4" />
+            Inbox
           </button>
         </div>
+
         <EmailView
           email={email}
           safetyScore={analysis.safetyScore}

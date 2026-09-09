@@ -1,101 +1,197 @@
 'use client';
 
-import { Card } from '@/components/ui/card';
 import { URLIntelligenceItem } from '@/lib/types';
-import { Link, Shield, AlertTriangle, CheckCircle, HelpCircle } from 'lucide-react';
+import { Link2, AlertTriangle, CheckCircle, XCircle, ExternalLink } from 'lucide-react';
 
 interface URLIntelligenceProps {
   urls: URLIntelligenceItem[];
 }
 
-const reputationConfig = {
-  malicious: { icon: AlertTriangle, color: 'text-red-600', bg: 'bg-red-50', border: 'border-red-200' },
-  suspicious: { icon: AlertTriangle, color: 'text-orange-600', bg: 'bg-orange-50', border: 'border-orange-200' },
-  unknown: { icon: HelpCircle, color: 'text-gray-600', bg: 'bg-gray-50', border: 'border-gray-200' },
-  safe: { icon: CheckCircle, color: 'text-green-600', bg: 'bg-green-50', border: 'border-green-200' },
+type Reputation = URLIntelligenceItem['reputation'];
+
+const reputationConfig: Record<Reputation, {
+  color: string; bg: string; border: string; Icon: React.ElementType; label: string;
+}> = {
+  malicious: {
+    color:  'var(--danger)',
+    bg:     'oklch(0.62 0.22 25 / 10%)',
+    border: 'oklch(0.62 0.22 25 / 22%)',
+    Icon:   XCircle,
+    label:  'MALICIOUS',
+  },
+  suspicious: {
+    color:  'oklch(0.72 0.18 35)',
+    bg:     'oklch(0.72 0.18 35 / 10%)',
+    border: 'oklch(0.72 0.18 35 / 22%)',
+    Icon:   AlertTriangle,
+    label:  'SUSPICIOUS',
+  },
+  unknown: {
+    color:  'var(--muted-foreground)',
+    bg:     'oklch(1 0 0 / 4%)',
+    border: 'oklch(1 0 0 / 8%)',
+    Icon:   Link2,
+    label:  'UNKNOWN',
+  },
+  safe: {
+    color:  'var(--safe)',
+    bg:     'oklch(0.66 0.155 145 / 10%)',
+    border: 'oklch(0.66 0.155 145 / 22%)',
+    Icon:   CheckCircle,
+    label:  'SAFE',
+  },
 };
+
+function RiskBar({ score }: { score: number }) {
+  const color =
+    score >= 75 ? 'var(--danger)'   :
+    score >= 50 ? 'var(--warning)'  :
+    score >= 25 ? 'oklch(0.72 0.18 45)' :
+                  'var(--safe)';
+  return (
+    <div className="flex items-center gap-2">
+      <div
+        className="flex-1 h-1.5 rounded-full overflow-hidden"
+        style={{ background: 'oklch(1 0 0 / 8%)' }}
+      >
+        <div
+          className="h-full rounded-full transition-all duration-700"
+          style={{ width: `${score}%`, background: color }}
+        />
+      </div>
+      <span className="text-xs tabular-nums w-6 text-right" style={{ color }}>
+        {score}
+      </span>
+    </div>
+  );
+}
 
 export function URLIntelligence({ urls }: URLIntelligenceProps) {
   if (urls.length === 0) {
     return (
-      <Card className="p-6">
-        <div className="flex items-center gap-2 mb-4">
-          <Link className="h-5 w-5 text-gray-600" />
-          <h2 className="text-lg font-semibold">URL Intelligence</h2>
+      <div
+        className="glass-panel rounded-2xl p-6"
+      >
+        <div className="flex items-center gap-2 mb-3">
+          <Link2 className="h-4 w-4" style={{ color: 'var(--accent-cyan)' }} />
+          <h2 className="text-sm font-semibold text-foreground uppercase tracking-wider">
+            URL Intelligence
+          </h2>
         </div>
-        <div className="text-center text-gray-500 py-8">
-          No URLs detected in this email
-        </div>
-      </Card>
+        <p className="text-sm text-muted-foreground">No URLs detected in this email.</p>
+      </div>
     );
   }
 
   return (
-    <Card className="p-6">
-      <div className="flex items-center gap-2 mb-6">
-        <Link className="h-5 w-5 text-gray-600" />
-        <h2 className="text-lg font-semibold">URL Intelligence</h2>
-        <span className="ml-auto text-sm text-gray-500">{urls.length} URLs found</span>
+    <div className="glass-panel rounded-2xl p-6">
+      {/* Header */}
+      <div className="flex items-center justify-between gap-3 mb-5">
+        <div className="flex items-center gap-2">
+          <Link2 className="h-4 w-4" style={{ color: 'var(--accent-cyan)' }} />
+          <h2 className="text-sm font-semibold text-foreground uppercase tracking-wider">
+            URL Intelligence
+          </h2>
+        </div>
+        <span
+          className="text-xs px-2 py-0.5 rounded-lg font-medium tabular-nums"
+          style={{
+            background: 'oklch(0.720 0.140 200 / 10%)',
+            color:      'var(--accent-cyan)',
+            border:     '1px solid var(--border-accent)',
+          }}
+        >
+          {urls.length} link{urls.length !== 1 ? 's' : ''}
+        </span>
       </div>
 
       <div className="space-y-3">
-        {urls.map((urlItem, index) => {
-          const config = reputationConfig[urlItem.reputation];
-          const ReputationIcon = config.icon;
+        {urls.map((item, index) => {
+          const cfg = reputationConfig[item.reputation];
+          const { Icon } = cfg;
 
           return (
             <div
               key={index}
-              className={`p-4 rounded-lg border-2 ${config.bg} ${config.border}`}
+              className="rounded-xl p-4 space-y-3"
+              style={{
+                background: cfg.bg,
+                border:     `1px solid ${cfg.border}`,
+              }}
             >
-              <div className="flex items-start justify-between mb-2">
-                <div className="flex items-center gap-2 flex-1 min-w-0">
-                  <ReputationIcon className={`h-4 w-4 ${config.color} flex-shrink-0`} />
-                  <div className="flex-1 min-w-0">
-                    <div className="text-sm font-medium text-gray-900 break-all">
-                      {urlItem.url}
-                    </div>
-                    <div className="text-xs text-gray-600 mt-1">
-                      {urlItem.domain}
-                    </div>
-                  </div>
-                </div>
-                <div className="flex flex-col items-end gap-1 ml-4">
-                  <span className={`text-xs font-semibold px-2 py-1 rounded ${config.color} ${config.bg}`}>
-                    {urlItem.reputation.toUpperCase()}
+              {/* URL row */}
+              <div className="flex items-start justify-between gap-3">
+                <div className="flex items-start gap-2 flex-1 min-w-0">
+                  <Icon className="h-4 w-4 mt-0.5 flex-shrink-0" style={{ color: cfg.color }} />
+                  <span
+                    className="text-xs font-mono break-all leading-relaxed"
+                    style={{ color: 'oklch(0.80 0.010 245)' }}
+                  >
+                    {item.url}
                   </span>
-                  <div className="text-xs text-gray-500">
-                    Risk: {urlItem.riskScore}/100
-                  </div>
+                </div>
+                <div className="flex items-center gap-1.5 flex-shrink-0">
+                  <span
+                    className="text-xs font-bold px-2 py-0.5 rounded-md"
+                    style={{
+                      color:      cfg.color,
+                      background: 'oklch(0 0 0 / 20%)',
+                    }}
+                  >
+                    {cfg.label}
+                  </span>
+                  <button
+                    className="p-1 rounded-md transition-colors text-muted-foreground hover:text-foreground"
+                    style={{ background: 'oklch(1 0 0 / 5%)' }}
+                    title="Open URL (use caution)"
+                    aria-label={`Open URL: ${item.url}`}
+                  >
+                    <ExternalLink className="h-3.5 w-3.5" />
+                  </button>
                 </div>
               </div>
 
-              <div className="grid grid-cols-2 gap-2 text-xs text-gray-600 mt-3 pt-3 border-t border-gray-200">
+              {/* Domain + metadata */}
+              <div className="grid grid-cols-2 gap-2 text-xs">
                 <div>
-                  <span className="font-medium">Status:</span> {urlItem.status}
+                  <span className="text-muted-foreground">Domain: </span>
+                  <span style={{ color: 'var(--accent-cyan)' }}>{item.domain}</span>
                 </div>
-                {urlItem.threatType && (
+                {item.threatType && (
                   <div>
-                    <span className="font-medium">Threat Type:</span> {urlItem.threatType}
+                    <span className="text-muted-foreground">Threat: </span>
+                    <span style={{ color: cfg.color }}>
+                      {item.threatType.replace(/_/g, ' ')}
+                    </span>
                   </div>
                 )}
-                {urlItem.firstSeen && (
+                {item.firstSeen && (
                   <div>
-                    <span className="font-medium">First Seen:</span>{' '}
-                    {new Date(urlItem.firstSeen).toLocaleDateString()}
+                    <span className="text-muted-foreground">First seen: </span>
+                    <span className="text-foreground">
+                      {new Date(item.firstSeen).toLocaleDateString()}
+                    </span>
                   </div>
                 )}
-                {urlItem.lastSeen && (
+                {item.lastSeen && (
                   <div>
-                    <span className="font-medium">Last Seen:</span>{' '}
-                    {new Date(urlItem.lastSeen).toLocaleDateString()}
+                    <span className="text-muted-foreground">Last seen: </span>
+                    <span className="text-foreground">
+                      {new Date(item.lastSeen).toLocaleDateString()}
+                    </span>
                   </div>
                 )}
+              </div>
+
+              {/* Risk score bar */}
+              <div className="space-y-1">
+                <div className="text-xs text-muted-foreground">Risk Score</div>
+                <RiskBar score={item.riskScore} />
               </div>
             </div>
           );
         })}
       </div>
-    </Card>
+    </div>
   );
 }

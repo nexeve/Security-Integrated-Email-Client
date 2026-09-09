@@ -1,116 +1,176 @@
 'use client';
 
-import { Card } from '@/components/ui/card';
-import type { EvidencePackage } from '@/lib/types';
-import { FileText, Download, Share2, Clock } from 'lucide-react';
-import { Button } from '@/components/ui/button';
+import { EvidencePackage as EvidencePackageType } from '@/lib/types';
+import { Package, Download, Clock, Hash, FileCode, FileJson } from 'lucide-react';
+import { motion } from 'framer-motion';
 
 interface EvidencePackageProps {
-  evidence: EvidencePackage;
-  onExport?: (format: 'pdf' | 'json' | 'xml') => void;
+  evidence: EvidencePackageType;
 }
 
-export function EvidencePackage({ evidence, onExport }: EvidencePackageProps) {
-  const handleExport = (format: 'pdf' | 'json' | 'xml') => {
-    if (onExport) {
-      onExport(format);
-    } else {
-      // Default behavior for prototype
-      console.log(`Exporting evidence as ${format.toUpperCase()}`);
-      alert(`Evidence export as ${format.toUpperCase()} - Prototype functionality`);
-    }
-  };
+const exportFormats: {
+  id: EvidencePackageType['exportFormats'][number];
+  label: string;
+  Icon: React.ElementType;
+  ext: string;
+}[] = [
+  { id: 'pdf',  label: 'PDF Report',   Icon: Package,   ext: '.pdf' },
+  { id: 'json', label: 'JSON Data',    Icon: FileJson,  ext: '.json' },
+  { id: 'xml',  label: 'XML Export',   Icon: FileCode,  ext: '.xml' },
+];
+
+export function EvidencePackage({ evidence }: EvidencePackageProps) {
+  const generatedDate = new Date(evidence.generatedAt);
 
   return (
-    <Card className="p-6">
+    <div className="glass-panel rounded-2xl p-6">
+      {/* Header */}
       <div className="flex items-center gap-2 mb-6">
-        <FileText className="h-5 w-5 text-gray-600" />
-        <h2 className="text-lg font-semibold">Final Evidence Package</h2>
+        <div
+          className="w-7 h-7 rounded-lg flex items-center justify-center flex-shrink-0"
+          style={{
+            background: 'oklch(0.720 0.140 200 / 12%)',
+            border: '1px solid var(--border-accent)',
+          }}
+        >
+          <Package className="h-4 w-4" style={{ color: 'var(--accent-cyan)' }} />
+        </div>
+        <h2 className="text-sm font-semibold text-foreground uppercase tracking-wider">
+          Evidence Package
+        </h2>
+        <span
+          className="ml-auto text-xs px-2 py-0.5 rounded-md font-mono"
+          style={{
+            background: 'oklch(0.720 0.140 200 / 8%)',
+            border: '1px solid var(--border-accent)',
+            color: 'var(--accent-cyan)',
+          }}
+        >
+          v{evidence.analysisVersion}
+        </span>
       </div>
 
-      <div className="mb-6 p-4 bg-blue-50 rounded-lg border border-blue-200">
-        <div className="flex items-start gap-3">
-          <FileText className="h-5 w-5 text-blue-600 mt-0.5" />
-          <div className="flex-1">
-            <div className="text-sm font-medium text-blue-900 mb-1">
-              Complete Forensic Analysis Report
+      {/* Report meta card */}
+      <div
+        className="rounded-xl p-4 mb-5"
+        style={{
+          background: 'oklch(0.720 0.140 200 / 6%)',
+          border: '1px solid oklch(0.720 0.140 200 / 18%)',
+          boxShadow: 'inset 0 1px 0 oklch(0.720 0.140 200 / 8%)',
+        }}
+      >
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+          <div className="space-y-0.5">
+            <div className="text-xs text-muted-foreground">Report ID</div>
+            <div
+              className="text-sm font-mono font-medium tracking-wider"
+              style={{ color: 'var(--accent-cyan)' }}
+            >
+              {evidence.reportId}
             </div>
-            <p className="text-sm text-blue-700">{evidence.summary}</p>
+          </div>
+          <div className="space-y-0.5">
+            <div className="text-xs text-muted-foreground flex items-center gap-1">
+              <Clock className="h-3 w-3" />
+              Generated
+            </div>
+            <div className="text-sm text-foreground">
+              {generatedDate.toLocaleString(undefined, {
+                dateStyle: 'medium',
+                timeStyle: 'short',
+              })}
+            </div>
+          </div>
+          <div className="space-y-0.5">
+            <div className="text-xs text-muted-foreground flex items-center gap-1">
+              <Hash className="h-3 w-3" />
+              Chain of Custody
+            </div>
+            <div
+              className="text-xs font-mono break-all leading-relaxed"
+              style={{ color: 'oklch(0.70 0.015 250)' }}
+            >
+              {`CL-${evidence.reportId}-AUTH`}
+            </div>
+          </div>
+          <div className="space-y-0.5">
+            <div className="text-xs text-muted-foreground">Analyst</div>
+            <div className="text-sm text-foreground">
+              Automated · Heuristic Engine
+            </div>
           </div>
         </div>
       </div>
 
-      {/* Report Metadata */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-        <MetadataItem
-          icon={FileText}
-          label="Report ID"
-          value={evidence.reportId}
-        />
-        <MetadataItem
-          icon={Clock}
-          label="Generated"
-          value={new Date(evidence.generatedAt).toLocaleString()}
-        />
-        <MetadataItem
-          icon={FileText}
-          label="Analysis Version"
-          value={evidence.analysisVersion}
-        />
-      </div>
-
-      {/* Export Options */}
-      <div>
-        <div className="text-sm font-medium text-gray-900 mb-3">Export Evidence</div>
-        <div className="flex flex-wrap gap-3">
-          {evidence.exportFormats.map((format) => (
-            <Button
-              key={format}
-              variant="outline"
-              onClick={() => handleExport(format)}
-              className="flex items-center gap-2"
-            >
-              <Download className="h-4 w-4" />
-              Export as {format.toUpperCase()}
-            </Button>
-          ))}
-          <Button
-            variant="outline"
-            onClick={() => handleExport('pdf')}
-            className="flex items-center gap-2"
-          >
-            <Share2 className="h-4 w-4" />
-            Share Report
-          </Button>
+      {/* Export formats */}
+      <div className="mb-5">
+        <h3 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-3">
+          Export Evidence
+        </h3>
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
+          {exportFormats
+            .filter(fmt => evidence.exportFormats.includes(fmt.id))
+            .map((fmt, index) => {
+              const { Icon } = fmt;
+              return (
+                <motion.button
+                  key={fmt.id}
+                  className="flex items-center gap-3 p-3.5 rounded-xl text-left transition-all duration-150 group"
+                  style={{
+                    background: 'oklch(0 0 0 / 20%)',
+                    border: '1px solid oklch(1 0 0 / 8%)',
+                  }}
+                  whileHover={{
+                    scale: 1.01,
+                    boxShadow: '0 0 0 1px oklch(0.720 0.140 200 / 20%), 0 4px 12px oklch(0 0 0 / 30%)',
+                  }}
+                  whileTap={{ scale: 0.98 }}
+                  initial={{ opacity: 0, y: 6 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: index * 0.06 }}
+                  aria-label={`Download ${fmt.label}`}
+                >
+                  <div
+                    className="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0"
+                    style={{
+                      background: 'oklch(0.720 0.140 200 / 10%)',
+                      boxShadow: 'inset 0 1px 0 oklch(1 0 0 / 8%)',
+                    }}
+                  >
+                    <Icon className="h-4 w-4" style={{ color: 'var(--accent-cyan)' }} />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <div className="text-xs font-semibold text-foreground">{fmt.label}</div>
+                    <div className="text-xs text-muted-foreground">{fmt.ext}</div>
+                  </div>
+                  <Download
+                    className="h-3.5 w-3.5 text-muted-foreground transition-colors group-hover:text-accent-cyan"
+                    style={{ color: 'var(--muted-foreground)' }}
+                    onMouseEnter={(e) => {
+                      (e.currentTarget as SVGElement).style.color = 'var(--accent-cyan)';
+                    }}
+                    onMouseLeave={(e) => {
+                      (e.currentTarget as SVGElement).style.color = 'var(--muted-foreground)';
+                    }}
+                  />
+                </motion.button>
+              );
+            })}
         </div>
       </div>
 
-      {/* Disclaimer */}
-      <div className="mt-6 p-3 bg-gray-50 rounded-lg border border-gray-200">
-        <p className="text-xs text-gray-600">
-          This evidence package contains the complete security analysis results for forensic purposes. 
-          All timestamps and analysis metadata are included for audit trail purposes.
-        </p>
-      </div>
-    </Card>
-  );
-}
-
-function MetadataItem({ 
-  icon: Icon, 
-  label, 
-  value 
-}: { 
-  icon: any; 
-  label: string; 
-  value: string; 
-}) {
-  return (
-    <div className="flex items-center gap-2 p-3 bg-gray-50 rounded-lg">
-      <Icon className="h-4 w-4 text-gray-500 flex-shrink-0" />
-      <div className="flex-1 min-w-0">
-        <div className="text-xs text-gray-600">{label}</div>
-        <div className="text-sm font-medium text-gray-900 truncate">{value}</div>
+      {/* Legal disclaimer */}
+      <div
+        className="rounded-xl p-3.5 text-xs leading-relaxed text-muted-foreground"
+        style={{
+          background: 'oklch(0 0 0 / 15%)',
+          border: '1px solid oklch(1 0 0 / 6%)',
+          borderLeft: '2px solid oklch(0.720 0.140 200 / 25%)',
+        }}
+      >
+        This evidence package was generated automatically by the Cyber Leek heuristic analysis engine.
+        Analysis results are for informational purposes only. Geolocation data is approximate.
+        Confirm all findings with qualified security personnel before taking action.
       </div>
     </div>
   );

@@ -1,16 +1,19 @@
 'use client';
 
 import { useEmails } from '@/lib/api/emails';
-import { Inbox, Star, Send, FileText, Trash, AlertTriangle, Shield, X } from 'lucide-react';
-import { usePathname } from 'next/navigation';
+import {
+  Inbox, Star, Send, FileText, Trash, AlertTriangle,
+  Shield, X, ShieldAlert,
+} from 'lucide-react';
+import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 
 const navItems = [
-  { id: 'inbox', label: 'Inbox', icon: Inbox },
+  { id: 'inbox',  label: 'Inbox',  icon: Inbox },
   { id: 'starred', label: 'Starred', icon: Star },
-  { id: 'sent', label: 'Sent', icon: Send },
+  { id: 'sent',   label: 'Sent',   icon: Send },
   { id: 'drafts', label: 'Drafts', icon: FileText },
-  { id: 'spam', label: 'Spam', icon: AlertTriangle },
-  { id: 'trash', label: 'Trash', icon: Trash },
+  { id: 'spam',   label: 'Spam',   icon: AlertTriangle },
+  { id: 'trash',  label: 'Trash',  icon: Trash },
 ];
 
 interface SidebarProps {
@@ -19,99 +22,220 @@ interface SidebarProps {
 
 export function Sidebar({ onCloseMobile }: SidebarProps) {
   const pathname = usePathname();
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const currentFolder = searchParams.get('folder') || 'inbox';
   const { data: emails } = useEmails();
 
-  // Calculate security stats
   const stats = emails?.reduce(
     (acc, email) => {
       acc.total++;
       if (email.analysis.safetyScore >= 80) acc.safe++;
       else if (email.analysis.safetyScore >= 50) acc.moderate++;
       else acc.dangerous++;
-      
       if (email.analysis.category === 'promotional') acc.promotional++;
-      if (email.analysis.category === 'suspicious' || email.analysis.category === 'malicious') {
-        acc.threats++;
-      }
+      if (
+        email.analysis.category === 'suspicious' ||
+        email.analysis.category === 'malicious'
+      ) acc.threats++;
       return acc;
     },
     { total: 0, safe: 0, moderate: 0, dangerous: 0, promotional: 0, threats: 0 }
   ) || { total: 0, safe: 0, moderate: 0, dangerous: 0, promotional: 0, threats: 0 };
 
+  const threatPercent = stats.total > 0 ? (stats.threats / stats.total) * 100 : 0;
+  const safePercent   = stats.total > 0 ? (stats.safe   / stats.total) * 100 : 0;
+  const modPercent    = stats.total > 0 ? (stats.moderate / stats.total) * 100 : 0;
+
   return (
-    <aside className="w-64 border-r bg-gray-50 flex flex-col h-full">
-      <div className="lg:hidden flex items-center justify-between p-4 border-b">
-        <span className="font-semibold text-gray-900">Menu</span>
+    <aside
+      className="w-64 flex flex-col h-full flex-shrink-0"
+      style={{
+        background: 'var(--sidebar)',
+        borderRight: '1px solid oklch(1 0 0 / 6%)',
+        boxShadow: 'inset -1px 0 0 oklch(1 0 0 / 4%)',
+      }}
+    >
+      {/* Mobile close row */}
+      <div
+        className="lg:hidden flex items-center justify-between px-4 py-3"
+        style={{ borderBottom: '1px solid oklch(1 0 0 / 6%)' }}
+      >
+        <span className="text-sm font-medium text-foreground">Navigation</span>
         <button
           onClick={onCloseMobile}
-          className="p-2 hover:bg-gray-200 rounded-lg transition-colors"
+          className="p-1.5 rounded-lg transition-colors text-muted-foreground hover:text-foreground"
+          style={{ background: 'oklch(1 0 0 / 5%)' }}
+          aria-label="Close menu"
         >
-          <X className="h-5 w-5 text-gray-600" />
+          <X className="h-4 w-4" />
         </button>
       </div>
-      <nav className="flex-1 p-4">
-        <ul className="space-y-1">
-          {navItems.map((item) => {
-            const Icon = item.icon;
-            const isActive = pathname === '/' && item.id === 'inbox';
-            const count = item.id === 'inbox' ? stats.total : undefined;
-            
-            return (
-              <li key={item.id}>
-                <button
-                  className={`w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
-                    isActive
-                      ? 'bg-blue-50 text-blue-700'
-                      : 'text-gray-700 hover:bg-gray-100'
-                  }`}
-                  onClick={() => {
-                    if (onCloseMobile) onCloseMobile();
+
+      {/* Navigation */}
+      <nav className="flex-1 px-3 py-4 space-y-0.5" aria-label="Main navigation">
+        {navItems.map((item) => {
+          const Icon = item.icon;
+          const isActive = pathname === '/' && currentFolder === item.id;
+          const count = item.id === 'inbox' ? stats.total : undefined;
+
+          return (
+            <button
+              key={item.id}
+              className="w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm transition-all duration-150 text-left"
+              style={
+                isActive
+                  ? {
+                      background: 'oklch(0.720 0.140 200 / 12%)',
+                      color: 'var(--accent-cyan)',
+                      boxShadow: 'inset 0 0 0 1px oklch(0.720 0.140 200 / 20%)',
+                    }
+                  : { color: 'var(--muted-foreground)', background: 'transparent' }
+              }
+              onMouseEnter={(e) => {
+                if (!isActive) {
+                  e.currentTarget.style.background = 'oklch(1 0 0 / 4%)';
+                  e.currentTarget.style.color = 'var(--foreground)';
+                }
+              }}
+              onMouseLeave={(e) => {
+                if (!isActive) {
+                  e.currentTarget.style.background = 'transparent';
+                  e.currentTarget.style.color = 'var(--muted-foreground)';
+                }
+              }}
+              onClick={() => {
+                router.push(item.id === 'inbox' ? '/' : `/?folder=${item.id}`);
+                if (onCloseMobile) onCloseMobile();
+              }}
+              aria-current={isActive ? 'page' : undefined}
+            >
+              <Icon className="h-4 w-4 flex-shrink-0" />
+              <span className="font-medium">{item.label}</span>
+              {count !== undefined && count > 0 && (
+                <span
+                  className="ml-auto text-xs px-1.5 py-0.5 rounded-full font-medium tabular-nums"
+                  style={{
+                    background: isActive
+                      ? 'oklch(0.720 0.140 200 / 20%)'
+                      : 'oklch(1 0 0 / 8%)',
+                    color: isActive ? 'var(--accent-cyan)' : 'var(--muted-foreground)',
                   }}
                 >
-                  <Icon className="h-4 w-4" />
-                  <span>{item.label}</span>
-                  {count !== undefined && count > 0 && (
-                    <span className="ml-auto text-xs bg-gray-200 text-gray-600 px-2 py-0.5 rounded-full">
-                      {count}
-                    </span>
-                  )}
-                </button>
-              </li>
-            );
-          })}
-        </ul>
+                  {count}
+                </span>
+              )}
+            </button>
+          );
+        })}
       </nav>
 
-      <div className="border-t p-4">
-        <div className="flex items-center gap-2 mb-3 text-sm font-semibold text-gray-700">
-          <Shield className="h-4 w-4 text-blue-600" />
-          <span>Security Analysis</span>
+      {/* Security Telemetry HUD */}
+      <div
+        className="mx-3 mb-4 rounded-xl p-4 space-y-3"
+        style={{
+          background: 'oklch(0.085 0.025 258)',
+          border: '1px solid oklch(1 0 0 / 6%)',
+          boxShadow: 'inset 0 1px 0 oklch(1 0 0 / 4%)',
+        }}
+      >
+        {/* HUD header */}
+        <div className="flex items-center gap-2">
+          <div
+            className="w-6 h-6 rounded-md flex items-center justify-center flex-shrink-0"
+            style={{ background: 'oklch(0.720 0.140 200 / 15%)' }}
+          >
+            <Shield className="h-3.5 w-3.5 text-accent" style={{ color: 'var(--accent-cyan)' }} />
+          </div>
+          <span
+            className="text-xs font-semibold uppercase tracking-wider"
+            style={{ color: 'var(--accent-cyan)' }}
+          >
+            Security HUD
+          </span>
+          {stats.threats > 0 && (
+            <ShieldAlert className="h-3.5 w-3.5 ml-auto animate-pulse" style={{ color: 'var(--danger)' }} />
+          )}
         </div>
-        <div className="space-y-2 text-xs">
-          <div className="flex justify-between">
-            <span className="text-gray-600">Emails Analyzed</span>
-            <span className="font-medium">{stats.total}</span>
+
+        {/* Analyzed count */}
+        <div className="flex items-baseline justify-between">
+          <span className="text-xs text-muted-foreground">Analyzed</span>
+          <span className="text-sm font-semibold tabular-nums" style={{ color: 'var(--foreground)' }}>
+            {stats.total}
+          </span>
+        </div>
+
+        {/* Stacked bar */}
+        {stats.total > 0 && (
+          <div className="space-y-1">
+            <div className="flex h-1.5 rounded-full overflow-hidden gap-px">
+              <div
+                className="rounded-full transition-all duration-700"
+                style={{
+                  width: `${safePercent}%`,
+                  background: 'var(--safe)',
+                  opacity: 0.85,
+                }}
+              />
+              <div
+                className="rounded-full transition-all duration-700"
+                style={{
+                  width: `${modPercent}%`,
+                  background: 'var(--warning)',
+                  opacity: 0.85,
+                }}
+              />
+              <div
+                className="rounded-full transition-all duration-700"
+                style={{
+                  width: `${Math.max(100 - safePercent - modPercent, 0)}%`,
+                  background: 'var(--danger)',
+                  opacity: 0.85,
+                }}
+              />
+            </div>
+            <div className="flex text-xs gap-3">
+              <span style={{ color: 'var(--safe)' }}>
+                <span className="tabular-nums font-medium">{stats.safe}</span> safe
+              </span>
+              <span style={{ color: 'var(--warning)' }}>
+                <span className="tabular-nums font-medium">{stats.moderate}</span> mod
+              </span>
+              <span style={{ color: 'var(--danger)' }}>
+                <span className="tabular-nums font-medium">{stats.dangerous}</span> risk
+              </span>
+            </div>
           </div>
-          <div className="flex justify-between">
-            <span className="text-gray-600">Safe</span>
-            <span className="font-medium text-green-600">{stats.safe}</span>
-          </div>
-          <div className="flex justify-between">
-            <span className="text-gray-600">Moderate Risk</span>
-            <span className="font-medium text-yellow-600">{stats.moderate}</span>
-          </div>
-          <div className="flex justify-between">
-            <span className="text-gray-600">Dangerous</span>
-            <span className="font-medium text-red-600">{stats.dangerous}</span>
-          </div>
-          <div className="flex justify-between">
-            <span className="text-gray-600">Promotional</span>
-            <span className="font-medium text-blue-600">{stats.promotional}</span>
-          </div>
-          <div className="flex justify-between">
-            <span className="text-gray-600">Threats Detected</span>
-            <span className="font-medium text-red-600">{stats.threats}</span>
-          </div>
+        )}
+
+        {/* Threat line */}
+        <div
+          className="flex items-center justify-between rounded-lg px-3 py-2"
+          style={{
+            background: stats.threats > 0
+              ? 'oklch(0.620 0.220 25 / 10%)'
+              : 'oklch(1 0 0 / 4%)',
+            border: stats.threats > 0
+              ? '1px solid oklch(0.620 0.220 25 / 20%)'
+              : '1px solid oklch(1 0 0 / 6%)',
+          }}
+        >
+          <span className="text-xs text-muted-foreground">Threats</span>
+          <span
+            className="text-sm font-bold tabular-nums"
+            style={{ color: stats.threats > 0 ? 'var(--danger)' : 'var(--safe)' }}
+          >
+            {stats.threats > 0 ? stats.threats : '—'}
+          </span>
+        </div>
+
+        {/* Promo line */}
+        <div className="flex items-center justify-between text-xs">
+          <span className="text-muted-foreground">Promotional</span>
+          <span style={{ color: 'var(--accent-cyan)' }} className="font-medium tabular-nums">
+            {stats.promotional}
+          </span>
         </div>
       </div>
     </aside>
