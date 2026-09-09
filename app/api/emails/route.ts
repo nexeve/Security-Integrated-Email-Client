@@ -1,14 +1,17 @@
-import { NextResponse } from 'next/server';
-import { getAllSampleEmails } from '@/lib/analysis/mock/sample-emails';
+import { NextResponse, NextRequest } from 'next/server';
+import { listEmails } from '@/lib/services/gmail';
 import { analysisEngine } from '@/lib/analysis/engine';
+import { getSession } from '@/lib/auth/session';
 
-/**
- * GET /api/emails
- * Returns list of all emails with their analysis results
- */
-export async function GET() {
+export async function GET(request: NextRequest) {
   try {
-    const emails = getAllSampleEmails();
+    const session = await getSession();
+    if (!session) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+
+    const folder = request.nextUrl.searchParams.get('folder') || 'inbox';
+    const emails = await listEmails(folder, 20);
     
     // Analyze each email
     const emailsWithAnalysis = emails.map(email => ({

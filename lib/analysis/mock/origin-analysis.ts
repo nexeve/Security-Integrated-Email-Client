@@ -15,6 +15,28 @@ export function generateOriginAnalysis(email: RawEmail): OriginAnalysis {
   const emailIdNum = parseInt(email.id) || 1;
   const baseIP = senderIP === 'unknown' ? '203.0.113.1' : senderIP;
   
+  if (email.metadata && 'isRealGmail' in email.metadata && (email.metadata as Record<string, unknown>).isRealGmail) {
+    // For real Gmail messages, we don't invent relay hops.
+    const realGeo = geolocationService.getLocationSync(senderIP);
+    return {
+      earliestReliableIP: senderIP !== 'unknown' ? senderIP : 'Unavailable',
+      confidence: senderIP !== 'unknown' ? 'high' : 'low',
+      senderDomain,
+      replyToDomain,
+      relayPath: [],
+      earliestOrigin: {
+        ip: senderIP !== 'unknown' ? senderIP : 'Unavailable',
+        location: {
+          country: realGeo.country,
+          city: realGeo.city,
+          region: realGeo.region,
+        },
+        provider: realGeo.isp,
+      },
+      totalHops: 0,
+    };
+  }
+
   // Create deterministic but varied relay paths based on email ID
   const relayPath: RelayHop[] = [];
   const baseLocations = [
@@ -71,8 +93,6 @@ export function generateOriginAnalysis(email: RawEmail): OriginAnalysis {
       country: baseGeo.country,
       city: baseGeo.city,
       region: baseGeo.region,
-      latitude: baseGeo.latitude,
-      longitude: baseGeo.longitude,
     },
     provider: baseGeo.isp,
   };

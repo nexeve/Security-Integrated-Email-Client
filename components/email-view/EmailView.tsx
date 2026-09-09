@@ -7,6 +7,9 @@ import { SecurityChecks } from './SecurityChecks';
 import { ThreatIndicators } from './ThreatIndicators';
 import { motion } from 'framer-motion';
 import { showPrototypeToast } from '@/lib/utils';
+import { useEmailAction } from '@/lib/api/emails';
+import { useRouter } from 'next/navigation';
+import { EmailHtmlContent } from './EmailHtmlContent';
 
 interface EmailViewProps {
   email: RawEmail;
@@ -27,7 +30,21 @@ export function EmailView({
   securityChecks,
   threatIndicators,
 }: EmailViewProps) {
+  const router = useRouter();
   const initials = email.headers.from.name.charAt(0).toUpperCase();
+  const { mutate: performAction } = useEmailAction();
+
+  const handleArchive = () => {
+    performAction({ id: email.id, action: 'archive' }, {
+      onSuccess: () => router.push('/')
+    });
+  };
+
+  const handleTrash = () => {
+    performAction({ id: email.id, action: 'trash' }, {
+      onSuccess: () => router.push('/')
+    });
+  };
 
   return (
     <motion.div
@@ -110,7 +127,7 @@ export function EmailView({
           <Forward className="h-4 w-4 text-muted-foreground" />
           Forward
         </button>
-        <button className="btn-tactile px-3 py-1.5 rounded-lg flex items-center gap-2 text-sm text-foreground transition-all" onClick={() => showPrototypeToast('Archive not implemented in prototype')}>
+        <button className="btn-tactile px-3 py-1.5 rounded-lg flex items-center gap-2 text-sm text-foreground transition-all" onClick={handleArchive}>
           <Archive className="h-4 w-4 text-muted-foreground" />
           Archive
         </button>
@@ -118,7 +135,7 @@ export function EmailView({
         <button
           className="btn-tactile px-3 py-1.5 rounded-lg flex items-center gap-2 text-sm transition-all"
           style={{ color: 'var(--danger)' }}
-          onClick={() => showPrototypeToast('Delete not implemented in prototype')}
+          onClick={handleTrash}
         >
           <Trash2 className="h-4 w-4" />
           Delete
@@ -132,12 +149,16 @@ export function EmailView({
       {/* Email body */}
       <div className="flex-1 overflow-auto bg-black/20">
         <div className="max-w-3xl mx-auto px-6 md:px-8 py-8 md:py-10">
-          <div 
-            className="text-[15px] leading-relaxed tracking-[0.01em] space-y-4 whitespace-pre-wrap break-words"
-            style={{ color: 'oklch(0.85 0.01 245)' }}
-          >
-            {email.body}
-          </div>
+          {email.htmlBody ? (
+            <EmailHtmlContent html={email.htmlBody} />
+          ) : (
+            <div 
+              className="text-[15px] leading-relaxed tracking-[0.01em] space-y-4 whitespace-pre-wrap break-words"
+              style={{ color: 'oklch(0.85 0.01 245)' }}
+            >
+              {email.body}
+            </div>
+          )}
 
         {/* Attachments */}
         {email.attachments && email.attachments.length > 0 && (

@@ -4,6 +4,7 @@ import React, { useState } from 'react';
 import { AppHeader } from './AppHeader';
 import { Sidebar } from './Sidebar';
 import { motion, AnimatePresence } from 'framer-motion';
+import { ComposeModal } from '../email-view/ComposeModal';
 
 interface MainLayoutProps {
   children: React.ReactNode;
@@ -11,6 +12,7 @@ interface MainLayoutProps {
 
 export function MainLayout({ children }: MainLayoutProps) {
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [isComposeOpen, setIsComposeOpen] = useState(false);
 
   return (
     <div className="flex flex-col h-screen overflow-hidden bg-atmospheric">
@@ -41,15 +43,19 @@ export function MainLayout({ children }: MainLayoutProps) {
           `}
         >
           <React.Suspense fallback={<div className="w-64 h-full" style={{ background: 'var(--sidebar)' }} />}>
-            <Sidebar onCloseMobile={() => setSidebarOpen(false)} />
+            <Sidebar onCloseMobile={() => setSidebarOpen(false)} onCompose={() => setIsComposeOpen(true)} />
           </React.Suspense>
         </div>
 
         {/* Main content — transparent so bg-atmospheric shows beneath */}
-        <main className="flex-1 overflow-auto w-full">
+        <main className="flex-1 overflow-auto w-full relative z-10">
           {children}
         </main>
       </div>
+
+      <AnimatePresence>
+        {isComposeOpen && <ComposeModal onClose={() => setIsComposeOpen(false)} />}
+      </AnimatePresence>
     </div>
   );
 }

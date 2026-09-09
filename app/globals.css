@@ -412,4 +412,17 @@
       0 0 14px oklch(from var(--accent-cyan) l c h / 25%),
       0 0 4px  oklch(from var(--accent-cyan) l c h / 14%);
   }
+  
+  .html-content img {
+    max-width: 100%;
+    height: auto;
+  }
+  .html-content a {
+    color: var(--accent-cyan);
+    text-decoration: underline;
+  }
+  .html-content table {
+    max-width: 100%;
+    overflow-x: auto;
+  }
 }

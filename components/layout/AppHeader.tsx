@@ -1,13 +1,33 @@
 'use client';
 
-import { Search, Settings, User, Menu, Shield } from 'lucide-react';
+import { Search, Settings, User, Menu, Shield, LogOut } from 'lucide-react';
 import { showPrototypeToast } from '@/lib/utils';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
+import { useRouter } from 'next/navigation';
 
 interface AppHeaderProps {
   onMenuClick?: () => void;
 }
 
 export function AppHeader({ onMenuClick }: AppHeaderProps) {
+  const router = useRouter();
+  const queryClient = useQueryClient();
+
+  const { data: session } = useQuery({
+    queryKey: ['session'],
+    queryFn: async () => {
+      const res = await fetch('/api/auth/me');
+      if (!res.ok) throw new Error('Not logged in');
+      return res.json();
+    },
+    retry: false,
+  });
+
+  const handleLogout = async () => {
+    await fetch('/api/auth/logout', { method: 'POST' });
+    queryClient.clear();
+    router.push('/login');
+  };
   return (
     <header
       className="glass-header h-14 flex items-center justify-between px-4 flex-shrink-0 relative z-30"
@@ -88,11 +108,25 @@ export function AppHeader({ onMenuClick }: AppHeaderProps) {
         </button>
 
         <button
-          className="p-1.5 rounded-xl transition-all btn-tactile"
+          className="p-1.5 rounded-xl transition-all btn-tactile overflow-hidden"
           aria-label="Profile"
           onClick={() => showPrototypeToast('Account not implemented in prototype')}
         >
-          <User className="h-4 w-4 text-muted-foreground" />
+          {session?.user?.picture ? (
+            /* eslint-disable-next-line @next/next/no-img-element */
+            <img src={session.user.picture} alt="Profile" className="h-5 w-5 rounded-md object-cover" />
+          ) : (
+            <User className="h-4 w-4 text-muted-foreground" />
+          )}
+        </button>
+
+        <button
+          className="p-2 rounded-xl transition-all text-muted-foreground hover:text-danger btn-tactile ml-2"
+          aria-label="Logout"
+          onClick={handleLogout}
+          title="Logout"
+        >
+          <LogOut className="h-4 w-4" />
         </button>
       </div>
     </header>

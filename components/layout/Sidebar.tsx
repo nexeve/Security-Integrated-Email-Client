@@ -18,9 +18,10 @@ const navItems = [
 
 interface SidebarProps {
   onCloseMobile?: () => void;
+  onCompose?: () => void;
 }
 
-export function Sidebar({ onCloseMobile }: SidebarProps) {
+export function Sidebar({ onCloseMobile, onCompose }: SidebarProps) {
   const pathname = usePathname();
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -72,8 +73,23 @@ export function Sidebar({ onCloseMobile }: SidebarProps) {
         </button>
       </div>
 
+      <div className="px-3 pt-4 pb-2">
+        <button
+          onClick={() => { if (onCompose) onCompose(); }}
+          className="w-full btn-tactile rounded-xl py-2.5 flex items-center justify-center gap-2 text-sm font-semibold shadow-sm transition-all group"
+          style={{ 
+            color: 'var(--foreground)',
+            background: 'linear-gradient(145deg, oklch(0.58 0.17 200 / 90%), oklch(0.45 0.14 235 / 90%))',
+            boxShadow: '0 4px 14px oklch(0.72 0.14 200 / 30%), inset 0 1px 0 oklch(1 0 0 / 25%)',
+            border: '1px solid oklch(0.72 0.14 200 / 50%)'
+          }}
+        >
+          <span className="text-lg leading-none mb-0.5">+</span> Compose
+        </button>
+      </div>
+
       {/* Navigation */}
-      <nav className="flex-1 px-3 py-4 space-y-0.5" aria-label="Main navigation">
+      <nav className="flex-1 px-3 py-2 space-y-0.5" aria-label="Main navigation">
         {navItems.map((item) => {
           const Icon = item.icon;
           const isActive = pathname === '/' && currentFolder === item.id;

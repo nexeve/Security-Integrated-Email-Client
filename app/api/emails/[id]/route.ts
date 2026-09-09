@@ -1,18 +1,20 @@
-import { NextResponse } from 'next/server';
-import { getSampleEmail } from '@/lib/analysis/mock/sample-emails';
+import { NextResponse, NextRequest } from 'next/server';
+import { getEmail } from '@/lib/services/gmail';
 import { analysisEngine } from '@/lib/analysis/engine';
+import { getSession } from '@/lib/auth/session';
 
-/**
- * GET /api/emails/[id]
- * Returns a single email with full analysis details
- */
 export async function GET(
-  request: Request,
+  request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const session = await getSession();
+    if (!session) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+
     const { id } = await params;
-    const email = getSampleEmail(id);
+    const email = await getEmail(id);
     
     if (!email) {
       return NextResponse.json(

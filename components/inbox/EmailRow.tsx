@@ -6,6 +6,7 @@ import { Star } from 'lucide-react';
 import { motion } from 'framer-motion';
 
 import { showPrototypeToast } from '@/lib/utils';
+import { useEmailAction } from '@/lib/api/emails';
 
 interface EmailRowProps {
   id: string;
@@ -67,6 +68,13 @@ export function EmailRow({
 }: EmailRowProps) {
   const scoreStyle  = getScoreStyle(safetyScore);
   const catConfig   = categoryConfig[category];
+  const { mutate: performAction } = useEmailAction();
+
+  const handleStarClick = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    performAction({ id, action: starred ? 'unstar' : 'star' });
+  };
 
   return (
     <Link href={`/email/${id}`} className="block">
@@ -98,11 +106,7 @@ export function EmailRow({
         {/* Star */}
         <button
           className="p-1 rounded transition-colors flex-shrink-0 relative z-10"
-          onClick={(e) => {
-            e.preventDefault();
-            e.stopPropagation();
-            showPrototypeToast('Star action not implemented in prototype');
-          }}
+          onClick={handleStarClick}
           aria-label={starred ? 'Unstar email' : 'Star email'}
         >
           <Star

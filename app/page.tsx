@@ -13,7 +13,7 @@ export default function InboxPage(props: { searchParams: Promise<{ folder?: stri
   const sp = props.searchParams ? React.use(props.searchParams) : {};
   const folder = sp.folder || 'inbox';
 
-  const { data: emails, isLoading, error } = useEmails();
+  const { data: emails, isLoading, error } = useEmails(folder);
 
   if (isLoading) {
     return (
