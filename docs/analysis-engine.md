@@ -47,8 +47,8 @@ Each `ThreatIndicator` provides structured, explainable context:
 ## 7. Determinism
 All forms of randomness (e.g. `Math.random()`), fabricated timestamps, and mock data insertion have been removed. If data is not available from the `RawEmail` object or an explicitly configured intelligence provider, the engine outputs `Unavailable` or returns empty arrays. This guarantees that a given input email will always produce the exact same `ExtendedAnalysisResult`.
 
-## 8. Threat Intelligence (Mock vs Real)
-The `MockThreatIntelProvider` explicitly flags its returns as `Mock Intel` and operates via deterministic string matching. Future implementations can inject actual reputation services (e.g. VirusTotal, Google Safe Browsing) by implementing the provider interface, keeping external intelligence separated from internal heuristics.
+## 8. Threat Intelligence Boundary
+URL threat intelligence is isolated behind the `ThreatIntelProvider` interface (`lib/analysis/services/threat-intel.ts`). The default `VoidThreatIntelProvider` outputs `reputation: 'unknown'` and `providerStatus: 'unavailable'` when no external provider is configured. When a `SAFE_BROWSING_API_KEY` is provided, `GoogleSafeBrowsingProvider` activates. Real intelligence feeds remain decoupled from internal heuristics and zero fabricated reputation data is generated.
 
 ## 9. Future Integration
 Because the analysis result schema remains strictly decoupled from the heuristic generation code, this prototype TypeScript engine can be cleanly replaced by an advanced Machine Learning Python API Backend. The backend must simply return the same `ExtendedAnalysisResult` schema.

@@ -4,8 +4,6 @@ import Link from 'next/link';
 import { EmailCategory } from '@/lib/types';
 import { Star } from 'lucide-react';
 import { motion } from 'framer-motion';
-
-import { showPrototypeToast } from '@/lib/utils';
 import { useEmailAction } from '@/lib/api/emails';
 
 interface EmailRowProps {

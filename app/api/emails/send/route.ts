@@ -1,5 +1,5 @@
 import { NextResponse, NextRequest } from 'next/server';
-import { sendEmail } from '@/lib/services/gmail';
+import { sendEmail } from '@/lib/gmail';
 import { getSession } from '@/lib/auth/session';
 
 export async function POST(request: NextRequest) {

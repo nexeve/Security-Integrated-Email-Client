@@ -1,6 +1,6 @@
 import { SignJWT, jwtVerify } from 'jose';
 import { cookies } from 'next/headers';
-import { NextRequest, NextResponse } from 'next/server';
+import { NextResponse } from 'next/server';
 
 const secretKey = process.env.SESSION_SECRET || 'cyber-leek-development-secret-do-not-use-in-prod';
 const key = new TextEncoder().encode(secretKey);

@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useSendEmail } from '@/lib/api/emails';
 import { X, Loader2 } from 'lucide-react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion } from 'framer-motion';
 
 interface ComposeModalProps {
   onClose: () => void;

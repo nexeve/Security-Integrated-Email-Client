@@ -554,6 +554,44 @@ The application will be available at:
 http://localhost:3000
 ```
 
+## Environment Configuration
+
+Create a `.env.local` file in the project root with the following variables:
+
+```bash
+# Google OAuth 2.0 Credentials (for Gmail API integration)
+GOOGLE_CLIENT_ID="your-google-client-id"
+GOOGLE_CLIENT_SECRET="your-google-client-secret"
+GOOGLE_REDIRECT_URI="http://localhost:3000/api/auth/google/callback"
+
+# Session Encryption Key
+SESSION_SECRET="your-32-byte-secure-random-secret"
+
+# Optional: Threat Intelligence Feeds
+SAFE_BROWSING_API_KEY=""
+```
+
+## Testing & Quality Checks
+
+Run the test suite:
+
+```bash
+npm test
+```
+
+Run TypeScript compilation and linter:
+
+```bash
+npx tsc --noEmit
+npm run lint
+```
+
+Build for production:
+
+```bash
+npm run build
+```
+
 ---
 
 # Development Workflow

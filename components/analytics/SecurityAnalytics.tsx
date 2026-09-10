@@ -1,6 +1,6 @@
 'use client';
 
-import { ExtendedAnalysisResult } from '@/lib/types';
+import { ExtendedAnalysisResult, RawEmail } from '@/lib/types';
 import { ThreatOverview } from './ThreatOverview';
 import { EmailDetails } from './EmailDetails';
 import { SecurityChecks } from '../email-view/SecurityChecks';
@@ -13,10 +13,8 @@ import { motion } from 'framer-motion';
 import { Cpu } from 'lucide-react';
 
 interface SecurityAnalyticsProps {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   analysis: ExtendedAnalysisResult;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  email: any;
+  email: RawEmail;
 }
 
 const panelVariants = {

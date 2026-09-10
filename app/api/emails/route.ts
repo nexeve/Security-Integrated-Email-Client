@@ -1,5 +1,5 @@
 import { NextResponse, NextRequest } from 'next/server';
-import { listEmails } from '@/lib/services/gmail';
+import { listEmails } from '@/lib/gmail';
 import { analysisEngine } from '@/lib/analysis/engine';
 import { getSession } from '@/lib/auth/session';
 

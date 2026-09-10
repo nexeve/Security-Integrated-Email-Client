@@ -8,9 +8,9 @@
  *   GEO-9..15 Geolocation behaviour
  *   PERF-16..17 Performance (skipGeo)
  */
-import { analysisEngine } from '../engine';
-import { isPrivateOrReservedIP, isPublicIPv4 } from '../services/geolocation';
-import { RawEmail } from '../../types';
+import { analysisEngine } from '../../lib/analysis/engine';
+import { isPrivateOrReservedIP, isPublicIPv4 } from '../../lib/analysis/services/geolocation';
+import { RawEmail } from '../../lib/types';
 
 function assert(condition: boolean, message: string) {
   if (!condition) throw new Error(`Assertion failed: ${message}`);

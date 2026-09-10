@@ -39,3 +39,11 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# local agent instruction files (private, local development only)
+AGENTS.md
+CLAUDE.md
+
+# local development & scratch artifacts
+/scratch/
+walkthrough.md

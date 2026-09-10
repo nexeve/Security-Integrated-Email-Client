@@ -4,8 +4,7 @@ import { RawEmail } from '@/lib/types';
 import { Mail, User, Reply, FileText } from 'lucide-react';
 
 interface EmailDetailsProps {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  email: any;
+  email: RawEmail;
 }
 
 function DetailRow({
@@ -37,13 +36,12 @@ function DetailRow({
 }
 
 export function EmailDetails({ email }: EmailDetailsProps) {
-  // Handle both RawEmail and plain email shapes
-  const headers = email?.headers ?? email;
-  const from = headers?.from ?? email?.from;
-  const to   = headers?.to   ?? (email?.to ? [{ name: '', email: email.to }] : []);
-  const cc   = headers?.cc;
+  const headers = email.headers;
+  const from = headers?.from;
+  const to = headers?.to ?? [];
+  const cc = headers?.cc;
   const returnPath = headers?.returnPath;
-  const subject    = headers?.subject ?? email?.subject;
+  const subject = headers?.subject;
 
   return (
     <div

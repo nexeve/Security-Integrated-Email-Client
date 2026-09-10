@@ -27,7 +27,7 @@ export function AnalysisLoading() {
     }, 400); // Progress every 400ms
 
     return () => clearInterval(interval);
-  }, [currentStep, analysisSteps.length]);
+  }, [currentStep]);
 
   return (
     <div className="flex flex-col items-center justify-center h-96">
