@@ -113,7 +113,7 @@ export function ThreatIndicators({ threats }: ThreatIndicatorsProps) {
                     className="text-xs font-semibold uppercase tracking-wide"
                     style={{ color: cfg.color }}
                   >
-                    {threat.type.replace(/-/g, ' ')}
+                    {threat.title || threat.category}
                   </span>
                 </div>
                 <span
@@ -127,7 +127,7 @@ export function ThreatIndicators({ threats }: ThreatIndicatorsProps) {
                 </span>
               </div>
               <p className="text-xs leading-relaxed" style={{ color: 'oklch(0.75 0.010 250)' }}>
-                {threat.description}
+                {threat.explanation}
               </p>
               {threat.evidence && (
                 <p className="text-xs mt-2 italic" style={{ color: 'var(--muted-foreground)' }}>

@@ -1,7 +1,7 @@
 'use client';
 
 import React from 'react';
-import { useEmail } from '@/lib/api/emails';
+import { useEmail, useEmailAction } from '@/lib/api/emails';
 import { useRouter } from 'next/navigation';
 import { MainLayout } from '@/components/layout/MainLayout';
 import { EmailView } from '@/components/email-view/EmailView';
@@ -21,6 +21,13 @@ export default function EmailDetailPage({ params }: { params: Promise<{ id: stri
   }, [params]);
 
   const { data: emailData, isLoading, error } = useEmail(id || '');
+  const { mutate: performAction } = useEmailAction();
+
+  React.useEffect(() => {
+    if (emailData?.email?.isUnread && id) {
+      performAction({ id, action: 'read' });
+    }
+  }, [emailData?.email?.isUnread, id, performAction]);
 
   const handleAnalyticsClick = () => {
     if (id) router.push(`/email/${id}/analytics`);

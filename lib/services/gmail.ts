@@ -18,9 +18,6 @@ export async function getGmailClient() {
   return google.gmail({ version: 'v1', auth: oauth2Client });
 }
 
-function decodeBase64(data: string) {
-  return Buffer.from(data.replace(/-/g, '+').replace(/_/g, '/'), 'base64').toString('utf-8');
-}
 
 function parseEmailAddresses(headerValue: string): EmailRecipient[] {
   if (!headerValue) return [];
@@ -83,7 +80,13 @@ export async function listEmails(folder: string = 'INBOX', maxResults = 20) {
   else if (folder === 'drafts') query = 'is:draft';
   else if (folder === 'spam') query = 'in:spam';
   else if (folder === 'trash') query = 'in:trash';
-  else query = 'in:inbox';
+  else if (folder === 'promotions') query = 'category:promotions in:inbox';
+  else if (folder === 'social') query = 'category:social in:inbox';
+  // Primary Inbox: INBOX label but NONE of the Gmail category labels.
+  // Gmail assigns CATEGORY_PROMOTIONS, CATEGORY_SOCIAL, CATEGORY_UPDATES, and
+  // CATEGORY_FORUMS to non-primary messages; we exclude all of them so that only
+  // genuinely primary mail appears here.
+  else query = 'in:inbox -category:promotions -category:social -category:updates -category:forums';
 
   const res = await gmail.users.messages.list({
     userId: 'me',
@@ -153,8 +156,11 @@ function normalizeMessage(msg: import('googleapis').gmail_v1.Schema$Message): Ra
     subject: getHeader(headers, 'Subject') || '(No Subject)',
     date: parsedDate,
     messageId: getHeader(headers, 'Message-ID'),
-    returnPath: getHeader(headers, 'Return-Path'),
+    replyTo: getHeader(headers, 'Reply-To') || undefined,
+    returnPath: getHeader(headers, 'Return-Path') || undefined,
     received: getHeaders(headers, 'Received'),
+    authenticationResults: authResults || undefined,
+    dkimSignature: getHeader(headers, 'DKIM-Signature') || undefined,
     spf,
     dkim,
     dmarc,
@@ -177,6 +183,9 @@ function normalizeMessage(msg: import('googleapis').gmail_v1.Schema$Message): Ra
     body: text || sanitizeHtml(html).replace(/<[^>]*>?/gm, ''), // Fallback text if no plain text
     htmlBody: html ? sanitizeHtml(html) : undefined,
     attachments,
+    labels: msg.labelIds || [],
+    isUnread: (msg.labelIds || []).includes('UNREAD'),
+    isStarred: (msg.labelIds || []).includes('STARRED'),
     metadata: {
       ip: originIp,
       isRealGmail: true,

@@ -30,7 +30,7 @@ export function AIInvestigation({ investigation }: AIInvestigationProps) {
           <Brain className="h-4 w-4" style={{ color: 'var(--accent-cyan)' }} />
         </div>
         <h2 className="text-sm font-semibold uppercase tracking-wider" style={{ color: 'var(--accent-cyan)' }}>
-          AI Investigation
+          Analysis Summary
         </h2>
         <div className="ml-auto flex items-center gap-1.5 text-xs text-muted-foreground">
           <Clock className="h-3 w-3" />

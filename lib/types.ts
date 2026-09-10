@@ -19,11 +19,14 @@ export interface EmailHeaders {
   subject: string;
   date: Date;
   messageId?: string;
+  replyTo?: string;
   returnPath?: string;
   received?: string[];
   spf?: string;
   dkim?: string;
   dmarc?: string;
+  authenticationResults?: string;
+  dkimSignature?: string;
 }
 
 export interface EmailAttachment {
@@ -43,13 +46,22 @@ export interface RawEmail {
     userAgent?: string;
     timezone?: string;
   };
+  labels?: string[];
+  isUnread?: boolean;
+  isStarred?: boolean;
 }
 
 export interface ThreatIndicator {
-  type: string;
+  id: string;
+  category: string;
   severity: 'low' | 'medium' | 'high' | 'critical';
-  description: string;
-  evidence?: string;
+  confidence: 'low' | 'medium' | 'high';
+  title: string;
+  explanation: string;
+  evidence: string;
+  source: string;
+  contributesToRisk: boolean;
+  riskContribution?: number;
 }
 
 export interface SecurityCheckResult {
@@ -154,6 +166,11 @@ export interface OriginAnalysis {
       country: string;
       city?: string;
       region?: string;
+      /** Real latitude from geolocation provider — undefined if unavailable. */
+      latitude?: number;
+      /** Real longitude from geolocation provider — undefined if unavailable. */
+      longitude?: number;
+      isp?: string;
     };
     provider?: string;
   };
@@ -178,6 +195,8 @@ export interface URLIntelligenceItem {
   firstSeen?: string;
   lastSeen?: string;
   riskScore: number; // 0-100
+  provider?: string;
+  providerStatus?: string;
 }
 
 export interface EvidencePackage {

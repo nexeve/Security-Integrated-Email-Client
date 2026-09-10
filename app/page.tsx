@@ -96,7 +96,7 @@ export default function InboxPage(props: { searchParams: Promise<{ folder?: stri
             animate={{ opacity: 1 }}
             transition={{ duration: 0.3 }}
           >
-            {emails?.map((email, i) => (
+            {emails?.map((email) => (
               <EmailRow
                 key={email.id}
                 id={email.id}
@@ -106,8 +106,8 @@ export default function InboxPage(props: { searchParams: Promise<{ folder?: stri
                 preview={email.preview}
                 safetyScore={email.analysis.safetyScore}
                 category={email.analysis.category}
-                unread={i % 3 !== 0}
-                starred={i % 5 === 0}
+                unread={email.isUnread}
+                starred={email.isStarred}
               />
             ))}
           </motion.div>

@@ -31,7 +31,7 @@ const reputationConfig: Record<Reputation, {
     bg:     'oklch(1 0 0 / 4%)',
     border: 'oklch(1 0 0 / 8%)',
     Icon:   Link2,
-    label:  'UNKNOWN',
+    label:  'NO INTEL',
   },
   safe: {
     color:  'var(--safe)',
@@ -165,19 +165,19 @@ export function URLIntelligence({ urls }: URLIntelligenceProps) {
                     </span>
                   </div>
                 )}
+                <div>
+                  <span className="text-muted-foreground">Provider: </span>
+                  <span className="text-foreground">{item.provider || 'Unavailable'}</span>
+                </div>
+                <div>
+                  <span className="text-muted-foreground">Provider Status: </span>
+                  <span className="text-foreground">{item.providerStatus || item.status || 'Unavailable'}</span>
+                </div>
                 {item.firstSeen && (
                   <div>
                     <span className="text-muted-foreground">First seen: </span>
                     <span className="text-foreground">
-                      {new Date(item.firstSeen).toLocaleDateString()}
-                    </span>
-                  </div>
-                )}
-                {item.lastSeen && (
-                  <div>
-                    <span className="text-muted-foreground">Last seen: </span>
-                    <span className="text-foreground">
-                      {new Date(item.lastSeen).toLocaleDateString()}
+                      {item.firstSeen === 'Unavailable' ? 'Unavailable' : new Date(item.firstSeen).toLocaleDateString()}
                     </span>
                   </div>
                 )}

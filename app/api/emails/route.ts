@@ -13,16 +13,23 @@ export async function GET(request: NextRequest) {
     const folder = request.nextUrl.searchParams.get('folder') || 'inbox';
     const emails = await listEmails(folder, 20);
     
-    // Analyze each email
-    const emailsWithAnalysis = emails.map(email => ({
+    // Analyze each email.
+    // skipGeo = true: skip external geolocation for the list view — the inbox
+    // does not display the map, and waiting for external geo on 20 emails adds
+    // seconds of latency for zero visible benefit.  Full geo runs in the detail
+    // endpoint (/api/emails/[id]) where the Analytics map actually renders.
+    const emailsWithAnalysis = await Promise.all(emails.map(async email => ({
       id: email.id,
       from: email.headers.from,
       to: email.headers.to,
       subject: email.headers.subject,
       date: email.headers.date,
       preview: email.body.substring(0, 150) + '...',
-      analysis: analysisEngine.analyze(email),
-    }));
+      isUnread: email.isUnread,
+      isStarred: email.isStarred,
+      labels: email.labels,
+      analysis: await analysisEngine.analyze(email, { skipGeo: true }),
+    })));
 
     return NextResponse.json(emailsWithAnalysis);
   } catch (error) {

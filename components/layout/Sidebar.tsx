@@ -3,17 +3,19 @@
 import { useEmails } from '@/lib/api/emails';
 import {
   Inbox, Star, Send, FileText, Trash, AlertTriangle,
-  Shield, X, ShieldAlert,
+  Shield, X, ShieldAlert, Tag, Users,
 } from 'lucide-react';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 
 const navItems = [
-  { id: 'inbox',  label: 'Inbox',  icon: Inbox },
-  { id: 'starred', label: 'Starred', icon: Star },
-  { id: 'sent',   label: 'Sent',   icon: Send },
-  { id: 'drafts', label: 'Drafts', icon: FileText },
-  { id: 'spam',   label: 'Spam',   icon: AlertTriangle },
-  { id: 'trash',  label: 'Trash',  icon: Trash },
+  { id: 'inbox',      label: 'Inbox',      icon: Inbox },
+  { id: 'starred',   label: 'Starred',    icon: Star },
+  { id: 'sent',      label: 'Sent',       icon: Send },
+  { id: 'drafts',    label: 'Drafts',     icon: FileText },
+  { id: 'promotions', label: 'Promotions', icon: Tag },
+  { id: 'social',    label: 'Social',     icon: Users },
+  { id: 'spam',      label: 'Spam',       icon: AlertTriangle },
+  { id: 'trash',     label: 'Trash',      icon: Trash },
 ];
 
 interface SidebarProps {
@@ -26,25 +28,33 @@ export function Sidebar({ onCloseMobile, onCompose }: SidebarProps) {
   const router = useRouter();
   const searchParams = useSearchParams();
   const currentFolder = searchParams.get('folder') || 'inbox';
-  const { data: emails } = useEmails();
+  const { data: inboxEmails } = useEmails('inbox');
+  const { data: promoEmails } = useEmails('promotions');
+  const { data: socialEmails } = useEmails('social');
+  // Security HUD stats are computed across all categorised mailboxes so the
+  // threat bar reflects the full picture.  Each message appears in exactly one
+  // of these three data sets (inbox / promotions / social) — no double-counting.
+  const emails = [...(inboxEmails || []), ...(promoEmails || []), ...(socialEmails || [])];
 
   const stats = emails?.reduce(
     (acc, email) => {
       acc.total++;
-      if (email.analysis.safetyScore >= 80) acc.safe++;
-      else if (email.analysis.safetyScore >= 50) acc.moderate++;
+      const riskLevel = email.analysis.threatOverview?.riskLevel || 'safe';
+      
+      if (riskLevel === 'safe') acc.safe++;
+      else if (riskLevel === 'low' || riskLevel === 'medium') acc.moderate++;
       else acc.dangerous++;
+
       if (email.analysis.category === 'promotional') acc.promotional++;
-      if (
-        email.analysis.category === 'suspicious' ||
-        email.analysis.category === 'malicious'
-      ) acc.threats++;
+      
+      if (riskLevel === 'high' || riskLevel === 'critical' || email.analysis.category === 'suspicious' || email.analysis.category === 'malicious') {
+        acc.threats++;
+      }
       return acc;
     },
     { total: 0, safe: 0, moderate: 0, dangerous: 0, promotional: 0, threats: 0 }
   ) || { total: 0, safe: 0, moderate: 0, dangerous: 0, promotional: 0, threats: 0 };
 
-  const threatPercent = stats.total > 0 ? (stats.threats / stats.total) * 100 : 0;
   const safePercent   = stats.total > 0 ? (stats.safe   / stats.total) * 100 : 0;
   const modPercent    = stats.total > 0 ? (stats.moderate / stats.total) * 100 : 0;
 
@@ -93,7 +103,10 @@ export function Sidebar({ onCloseMobile, onCompose }: SidebarProps) {
         {navItems.map((item) => {
           const Icon = item.icon;
           const isActive = pathname === '/' && currentFolder === item.id;
-          const count = item.id === 'inbox' ? stats.total : undefined;
+          let count = undefined;
+          if (item.id === 'inbox') count = inboxEmails?.filter(e => e.isUnread).length;
+          if (item.id === 'promotions') count = promoEmails?.filter(e => e.isUnread).length;
+          if (item.id === 'social') count = socialEmails?.filter(e => e.isUnread).length;
 
           return (
             <button

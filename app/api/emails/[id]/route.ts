@@ -23,7 +23,7 @@ export async function GET(
       );
     }
 
-    const analysis = analysisEngine.analyze(email);
+    const analysis = await analysisEngine.analyze(email);
 
     return NextResponse.json({
       email,
